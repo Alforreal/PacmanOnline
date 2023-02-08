@@ -184,7 +184,7 @@ void processInput(GLFWwindow *window)
         {
             // for debugging
             system("clear");
-            std::cout << "Posidion(x, y): ";
+            std::cout << "Position(x, y): ";
             for(int j = 0; j < 2; j++)
             {
                 std::cout << PacmanView[3][j] << " ";
@@ -202,7 +202,7 @@ void processInput(GLFWwindow *window)
         {
             // for debugging
             system("clear");
-            std::cout << "Posidion(x, y): ";
+            std::cout << "Position(x, y): ";
             for(int j = 0; j < 2; j++)
             {
                 std::cout << PacmanView[3][j] << " ";
@@ -220,7 +220,7 @@ void processInput(GLFWwindow *window)
         {
             // for debugging
             system("clear");
-            std::cout << "Posidion(x, y): ";
+            std::cout << "Position(x, y): ";
             for(int j = 0; j < 2; j++)
             {
                 std::cout << PacmanView[3][j] << " ";
@@ -241,7 +241,7 @@ void processInput(GLFWwindow *window)
         {
             // for debugging  
             system("clear");
-            std::cout << "Posidion(x, y): ";
+            std::cout << "Position(x, y): ";
             for(int j = 0; j < 2; j++)
             {
                 std::cout << PacmanView[3][j] << " ";
