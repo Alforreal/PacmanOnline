@@ -1,7 +1,7 @@
 #include "shader.h"
 #include <stdlib.h>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
+// #include <glm/ext/matrix_clip_space.hpp>
+// #include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -10,7 +10,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 bool movement = false;
-
+float WallCoords [] {
+    0.5f, 0.5f,
+    -0.5f, -0.5f,
+};
 glm::mat4 PacmanView = glm::mat4(1.0f);
 void processInput(GLFWwindow *window);
 int main()
@@ -97,6 +100,7 @@ int main()
 
     glm::mat4 HorizontalWallModel = glm::mat4(1.0f);
     HorizontalWallModel = glm::translate(HorizontalWallModel, glm::vec3(0.0f, 0.0f, -2.0f));
+    glm::mat4 HorizontalWallView = glm::mat4(1.0f);
     glm::mat4 HorizontalWallProjection;
     HorizontalWallProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 
@@ -119,21 +123,35 @@ int main()
         glBindVertexArray(PacmanVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        // uniform values
-        // --------------
-        unsigned int PacmanModelLoc = glGetUniformLocation(PacMan.ID, "model");
+        // uniform values for pacman
+        // -------------------------
+        unsigned int PacmanModelLoc = glGetUniformLocation(PacMan.ID, "Pmodel");
         glUniformMatrix4fv(PacmanModelLoc, 1, GL_FALSE, glm::value_ptr(PacmanModel));
 
-        unsigned int PacmanViewLoc = glGetUniformLocation(PacMan.ID, "view");
+        unsigned int PacmanViewLoc = glGetUniformLocation(PacMan.ID, "Pview");
         glUniformMatrix4fv(PacmanViewLoc, 1, GL_FALSE, glm::value_ptr(PacmanView));
 
-        unsigned int PacmanProjectionLoc = glGetUniformLocation(PacMan.ID, "projection");
+        unsigned int PacmanProjectionLoc = glGetUniformLocation(PacMan.ID, "Pprojection");
         glUniformMatrix4fv(PacmanProjectionLoc, 1, GL_FALSE, glm::value_ptr(PacmanProjection));
-
-        Wall.use();
+        unsigned int WallModelLoc = glGetUniformLocation(Wall.ID, "Wmodel");
+        unsigned int WallViewLoc = glGetUniformLocation(Wall.ID, "Wview");
+        unsigned int WallProjectionLoc = glGetUniformLocation(Wall.ID, "Wprojection");
+         
         glBindVertexArray(WallVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        for(int i = 0, n = sizeof(WallCoords)/sizeof(float); i < n; i+=2)
+        {
+            HorizontalWallModel = glm::translate(HorizontalWallModel, glm::vec3(WallCoords[i], WallCoords[i+1], -2.0f));
+            Wall.use();
+            glUniformMatrix4fv(WallModelLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallModel));
+            glUniformMatrix4fv(WallViewLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallView));
+            glUniformMatrix4fv(WallProjectionLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallProjection));
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            HorizontalWallModel = glm::mat4(1.0f);
+        }
 
+        // uniform values for the wall
+        // ---------------------------
+        
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -164,15 +182,14 @@ void processInput(GLFWwindow *window)
         movement = true;
         while(movement)
         {
+            // for debugging
             system("clear");
-            for(int i = 0; i < 4; i++)
+            std::cout << "Posidion(x, y): ";
+            for(int j = 0; j < 2; j++)
             {
-                for(int j = 0; j < 4; j++)
-                {
-                    std::cout << PacmanView[i][j] << " ";
-                }
-                std::cout << "\n";
+                std::cout << PacmanView[3][j] << " ";
             }
+            std::cout << "\n";
             PacmanView = glm::translate(PacmanView, glm::vec3(0.015f, 0.0f, 0.0f));
             movement = false;
         }
@@ -183,15 +200,14 @@ void processInput(GLFWwindow *window)
         movement = true;
         while(movement)
         {
+            // for debugging
             system("clear");
-            for(int i = 0; i < 4; i++)
+            std::cout << "Posidion(x, y): ";
+            for(int j = 0; j < 2; j++)
             {
-                for(int j = 0; j < 4; j++)
-                {
-                    std::cout << PacmanView[i][j] << " ";
-                }
-                std::cout << "\n";
+                std::cout << PacmanView[3][j] << " ";
             }
+            std::cout << "\n";
             PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, 0.015f, 0.0f));
             movement = false;
         }
@@ -202,15 +218,17 @@ void processInput(GLFWwindow *window)
         movement = true;
         while(movement)
         {
+            // for debugging
             system("clear");
-            for(int i = 0; i < 4; i++)
+            std::cout << "Posidion(x, y): ";
+            for(int j = 0; j < 2; j++)
             {
-                for(int j = 0; j < 4; j++)
-                {
-                    std::cout << PacmanView[i][j] << " ";
-                }
-                std::cout << "\n";
+                std::cout << PacmanView[3][j] << " ";
             }
+            std::cout << "\n";
+            // check for collision
+                // X:
+            
             PacmanView = glm::translate(PacmanView, glm::vec3(-0.015f, 0.0f, 0.0f));
             movement = false;
         }
@@ -221,15 +239,14 @@ void processInput(GLFWwindow *window)
         movement = true;
         while(movement)
         {
+            // for debugging  
             system("clear");
-            for(int i = 0; i < 4; i++)
+            std::cout << "Posidion(x, y): ";
+            for(int j = 0; j < 2; j++)
             {
-                for(int j = 0; j < 4; j++)
-                {
-                    std::cout << PacmanView[i][j] << " ";
-                }
-                std::cout << "\n";
+                std::cout << PacmanView[3][j] << " ";
             }
+            std::cout << "\n";
             PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -0.015f, 0.0f));
             movement = false;
         }
