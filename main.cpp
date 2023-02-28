@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+// #include <unistd.h> // used for usleep()
 
 bool movement = false;
 float PacmanSize = 0.05f;
@@ -16,7 +16,7 @@ float WallWidth = 0.05f;
 float WallHeight = 0.02f;
 float PacmanSpeed = 0.015f;
 float HorizontalWallCoords [] {
-    0.51f, 0.5f,
+    0.5f, 0.5f,
     0.6f, 0.4f,
     0.4f, 0.6f,
     -0.5f, 0.5f,
@@ -29,12 +29,16 @@ float HorizontalWallCoords [] {
     -0.6f, -0.4f,
     -0.4f, -0.6f
 };
+float VerticalWallCoords[] {
+    0.3f, 0.3f,
+
+};
 glm::mat4 PacmanView = glm::mat4(1.0f);
-int PacmanMovement(float x, float y);
+const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
+int PacmanMovement(float x, float y, char direction);
 void processInput(GLFWwindow *window);
 int main()
 {
-    const int WINDOW_HEIGHT = 800, WINDOW_WIDTH = 800;
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -91,7 +95,7 @@ int main()
     PacmanProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
     
     
-    Shader Wall("Shaders/wall.vs", "Shaders/wall.fs");
+    Shader HorizontalWall("Shaders/HorizontalWall.vs", "Shaders/HorizontalWall.fs");
     float HorizontalWallPos[] = {
         WallWidth, WallHeight, 0.0f,
         WallWidth, -WallHeight, 0.0f,
@@ -101,12 +105,12 @@ int main()
         -WallWidth, -WallHeight, 0.0f,
         WallWidth, -WallHeight, 0.0f
     };
-    unsigned int WallVBO, WallVAO;
-    glGenVertexArrays(1, &WallVAO);
-    glGenBuffers(1, &WallVBO);
+    unsigned int HorizontalWallVBO, HorizontalWallVAO;
+    glGenVertexArrays(1, &HorizontalWallVAO);
+    glGenBuffers(1, &HorizontalWallVBO);
 
-    glBindVertexArray(WallVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, WallVBO);
+    glBindVertexArray(HorizontalWallVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, HorizontalWallVBO);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(HorizontalWallPos), HorizontalWallPos, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
@@ -119,6 +123,33 @@ int main()
     glm::mat4 HorizontalWallView = glm::mat4(1.0f);
     glm::mat4 HorizontalWallProjection;
     HorizontalWallProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
+
+    //vertical wall:
+    Shader VerticalWall("VerticalWall.vs", "VerticalWall.fs");
+    float VerticalWallPos[] = {
+        WallHeight, WallWidth, 0.0f,
+        WallHeight, -WallWidth, 0.0f,
+        -WallHeight, WallWidth, 0.0f,
+
+        -WallHeight, WallWidth, 0.0f,
+        -WallHeight, -WallWidth, 0.0f,
+        WallHeight, -WallWidth, 0.0f
+    };
+    unsigned int VerticalWallVBO, VerticalWallVAO;
+    glGenVertexArrays(1, &VerticalWallVAO);
+    glGenBuffers(1, &VerticalWallVBO);
+    glBindVertexArray(VerticalWallVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VerticalWallVAO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VerticalWallPos), VerticalWallPos, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // mathematics for the wall:
+    glm::mat4 VerticalWallModel = glm::mat4(1.0f);
+    VerticalWallModel = glm::translate(VerticalWallModel, glm::vec3(0.0f, 0.0f, -2.0f));
+    glm::mat4 VerticalWallView = glm::mat4(1.0f);
+    glm::mat4 VerticalWallProjection;
+    VerticalWallProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 
     // render loop
     // -----------
@@ -149,22 +180,35 @@ int main()
 
         unsigned int PacmanProjectionLoc = glGetUniformLocation(PacMan.ID, "Pprojection");
         glUniformMatrix4fv(PacmanProjectionLoc, 1, GL_FALSE, glm::value_ptr(PacmanProjection));
-        unsigned int WallModelLoc = glGetUniformLocation(Wall.ID, "Wmodel");
-        unsigned int WallViewLoc = glGetUniformLocation(Wall.ID, "Wview");
-        unsigned int WallProjectionLoc = glGetUniformLocation(Wall.ID, "Wprojection");
+        unsigned int WallModelLoc = glGetUniformLocation(HorizontalWall.ID, "Wmodel");
+        unsigned int WallViewLoc = glGetUniformLocation(HorizontalWall.ID, "Wview");
+        unsigned int WallProjectionLoc = glGetUniformLocation(HorizontalWall.ID, "Wprojection");
          
-        glBindVertexArray(WallVAO);
+        glBindVertexArray(HorizontalWallVAO);
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
             HorizontalWallModel = glm::translate(HorizontalWallModel, glm::vec3(HorizontalWallCoords[i], HorizontalWallCoords[i+1], -2.0f));
-            Wall.use();
+            HorizontalWall.use();
             glUniformMatrix4fv(WallModelLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallModel));
             glUniformMatrix4fv(WallViewLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallView));
             glUniformMatrix4fv(WallProjectionLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallProjection));
             glDrawArrays(GL_TRIANGLES, 0, 6);
             HorizontalWallModel = glm::mat4(1.0f);
         }
-
+        WallModelLoc = glGetUniformLocation(VerticalWall.ID, "Wmodel");
+        WallViewLoc = glGetUniformLocation(VerticalWall.ID, "Wview");
+        WallProjectionLoc = glGetUniformLocation(VerticalWall.ID, "Wprojection");
+        glBindVertexArray(VerticalWallVAO);
+        for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
+        {    
+            VerticalWallModel = glm::translate(VerticalWallModel, glm::vec3(VerticalWallCoords[i], VerticalWallCoords[i+1], -2.0f));
+            VerticalWall.use();
+            glUniformMatrix4fv(WallModelLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallModel));
+            glUniformMatrix4fv(WallViewLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallView));
+            glUniformMatrix4fv(WallProjectionLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallProjection));
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            VerticalWallModel = glm::mat4(1.0f);
+        }
         // uniform values for the wall
         // ---------------------------
         
@@ -178,8 +222,10 @@ int main()
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &PacmanVAO);
     glDeleteBuffers(1, &PacmanVBO);
-    glDeleteVertexArrays(1, &WallVAO);
-    glDeleteVertexArrays(1, &WallVBO);
+    glDeleteVertexArrays(1, &HorizontalWallVAO);
+    glDeleteVertexArrays(1, &HorizontalWallVBO);
+    glDeleteVertexArrays(1, &VerticalWallVAO);
+    glDeleteVertexArrays(1, &VerticalWallVBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -195,64 +241,22 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
     else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-        movement = true;
-        while(movement)
-        {
-            // for debugging
-            system("clear");
-            std::cout << "Position(x, y): ";
-            for(int j = 0; j < 2; j++)
-            {
-                std::cout << PacmanView[3][j] << " ";
-            }
-            std::cout << "\n";
-            PacmanView = glm::translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
-            movement = false;
-        }
-        
+        PacmanMovement(1, 0, 'r');
     }
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        movement = true;
-        while(movement)
-        {
-            // for debugging
-            system("clear");
-            std::cout << "Position(x, y): ";
-            for(int j = 0; j < 2; j++)
-            {
-                std::cout << PacmanView[3][j] << " ";
-            }
-            std::cout << "\n";
-            PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, PacmanSpeed, 0.0f));
-            movement = false;
-        }
-        
+        PacmanMovement(0, 1, 'u');       
     }
     else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-        PacmanMovement(-1, 0);        
+        PacmanMovement(-1, 0, 'l');
     }
     else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        movement = true;
-        while(movement)
-        {
-            // for debugging  
-            system("clear");
-            std::cout << "Position(x, y): ";
-            for(int j = 0; j < 2; j++)
-            {
-                std::cout << PacmanView[3][j] << " ";
-            }
-            std::cout << "\n";
-            PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
-            movement = false;
-        }
-        
+        PacmanMovement(0, -1, 'd');        
     }
 }
-int PacmanMovement(float x, float y)
+int PacmanMovement(float x, float y, char direction)
 {
     movement = true;
     while(movement)
@@ -268,19 +272,40 @@ int PacmanMovement(float x, float y)
         // check for collision
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+= 2)
         {
-            // checking for collision from the left:
-            if(PacmanView[3][0]-PacmanSize < HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize > HorizontalWallCoords[i]-WallWidth && HorizontalWallCoords[i+1]+WallHeight > PacmanView[3][1]-PacmanSize && HorizontalWallCoords[i+1]-WallHeight < PacmanView[3][1]+PacmanSize)
+            if(direction == 'l') // collision from the left
             {
-                std::cout << "Collision from the left side on x: " << PacmanView[3][0]-PacmanSize << ", y(upper): " << PacmanView[3][1]+PacmanSize << ", y(lower): " << PacmanView[3][1]-PacmanSize << "\n";
-                movement = false;
+                if(PacmanView[3][0]-PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]+WallWidth && HorizontalWallCoords[i+1]+WallHeight >= PacmanView[3][1]-PacmanSize && HorizontalWallCoords[i+1]-WallHeight <= PacmanView[3][1]+PacmanSize)
+                {
+                    std::cout << "Collision from the left side on x: " << PacmanView[3][0]-PacmanSize << ", y(upper): " << PacmanView[3][1]+PacmanSize << ", y(lower): " << PacmanView[3][1]-PacmanSize << "\n";
+                    return 0;
+                }
             }
-            // checking for collision from the right
-            // else if(PacmanView[3][0]+PacmanSize+PacmanSpeed/2)
+            if(direction == 'r') // collision from the right
+            {
+                if(PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth && PacmanView[3][0]+PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][1]+PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][1]-PacmanSize <= HorizontalWallCoords[i+1]+WallHeight)
+                {
+                    std::cout << "Collision from the right side on x: " << PacmanView[3][0]+PacmanSize << ", y(upper): " << PacmanView[3][1]+PacmanSize << ", y(lower): " << PacmanView[3][1]-PacmanSize << "\n";
+                    return 0;
+                }
+            }
+            if(direction == 'u')
+            {
+                if(PacmanView[3][1]+PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][1]+PacmanSize <= HorizontalWallCoords[i+1]+WallHeight && PacmanView[3][0]-PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth)
+                {
+                    std::cout << "Collision from the top on y: " << PacmanView[3][1]+PacmanSize << ", x(right): " << PacmanView[3][0]+PacmanSize << ", x(left): " << PacmanView[3][0]-PacmanSize << "\n";
+                    return 0;
+                }
+            }
+            if(direction == 'd')
+            {
+                if(PacmanView[3][1]-PacmanSize <= HorizontalWallCoords[i+1]+WallHeight && PacmanView[3][1]-PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][0]-PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth)
+                {
+                    std::cout << "Collision from the bottom on y: " << PacmanView[3][1]-PacmanSize << ", x(right): " << PacmanView[3][0]+PacmanSize << ", x(left): " << PacmanView[3][0]-PacmanSize << "\n";
+                    return 0;
+                }
+            }
         }
-        if(movement)
-        {
-            PacmanView = glm::translate(PacmanView, glm::vec3(x*PacmanSpeed, y*PacmanSpeed, 0.0f));            
-        }
+        PacmanView = glm::translate(PacmanView, glm::vec3(x*PacmanSpeed, y*PacmanSpeed, 0.0f));
         movement = false;
     }
     return 0;
