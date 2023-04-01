@@ -1,7 +1,7 @@
 #include "shader.h"
 #include <stdlib.h>
-// #include <glm/ext/matrix_clip_space.hpp>
-// #include <glm/ext/matrix_transform.hpp>
+// #include <glm/ext/matrix_clip_space.hpp> // previously didn't work without them, now it does, idk why
+// #include <glm/ext/matrix_transform.hpp> //required for matrix transformation, or at least I thought so, code works without them
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -30,8 +30,7 @@ float HorizontalWallCoords [] {
     -0.4f, -0.6f
 };
 float VerticalWallCoords[] {
-    0.3f, 0.3f,
-
+    0.3f, 0.3f
 };
 glm::mat4 PacmanView = glm::mat4(1.0f);
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
@@ -125,7 +124,7 @@ int main()
     HorizontalWallProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 
     //vertical wall:
-    Shader VerticalWall("VerticalWall.vs", "VerticalWall.fs");
+    Shader VerticalWall("Shaders/VerticalWall.vs", "Shaders/VerticalWall.fs");
     float VerticalWallPos[] = {
         WallHeight, WallWidth, 0.0f,
         WallHeight, -WallWidth, 0.0f,
@@ -180,32 +179,32 @@ int main()
 
         unsigned int PacmanProjectionLoc = glGetUniformLocation(PacMan.ID, "Pprojection");
         glUniformMatrix4fv(PacmanProjectionLoc, 1, GL_FALSE, glm::value_ptr(PacmanProjection));
-        unsigned int WallModelLoc = glGetUniformLocation(HorizontalWall.ID, "Wmodel");
-        unsigned int WallViewLoc = glGetUniformLocation(HorizontalWall.ID, "Wview");
-        unsigned int WallProjectionLoc = glGetUniformLocation(HorizontalWall.ID, "Wprojection");
+        unsigned int HorizontalWallModelLoc = glGetUniformLocation(HorizontalWall.ID, "Wmodel");
+        unsigned int HorizontalWallViewLoc = glGetUniformLocation(HorizontalWall.ID, "Wview");
+        unsigned int HorizontalWallProjectionLoc = glGetUniformLocation(HorizontalWall.ID, "Wprojection");
          
         glBindVertexArray(HorizontalWallVAO);
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
             HorizontalWallModel = glm::translate(HorizontalWallModel, glm::vec3(HorizontalWallCoords[i], HorizontalWallCoords[i+1], -2.0f));
             HorizontalWall.use();
-            glUniformMatrix4fv(WallModelLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallModel));
-            glUniformMatrix4fv(WallViewLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallView));
-            glUniformMatrix4fv(WallProjectionLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallProjection));
+            glUniformMatrix4fv(HorizontalWallModelLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallModel));
+            glUniformMatrix4fv(HorizontalWallViewLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallView));
+            glUniformMatrix4fv(HorizontalWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(HorizontalWallProjection));
             glDrawArrays(GL_TRIANGLES, 0, 6);
             HorizontalWallModel = glm::mat4(1.0f);
         }
-        WallModelLoc = glGetUniformLocation(VerticalWall.ID, "Wmodel");
-        WallViewLoc = glGetUniformLocation(VerticalWall.ID, "Wview");
-        WallProjectionLoc = glGetUniformLocation(VerticalWall.ID, "Wprojection");
+        unsigned int VerticalWallModelLoc = glGetUniformLocation(VerticalWall.ID, "Wmodel");
+        unsigned int VerticalWallViewLoc = glGetUniformLocation(VerticalWall.ID, "Wview");
+        unsigned int VerticalWallProjectionLoc = glGetUniformLocation(VerticalWall.ID, "Wprojection");
         glBindVertexArray(VerticalWallVAO);
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {    
             VerticalWallModel = glm::translate(VerticalWallModel, glm::vec3(VerticalWallCoords[i], VerticalWallCoords[i+1], -2.0f));
             VerticalWall.use();
-            glUniformMatrix4fv(WallModelLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallModel));
-            glUniformMatrix4fv(WallViewLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallView));
-            glUniformMatrix4fv(WallProjectionLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallProjection));
+            glUniformMatrix4fv(VerticalWallModelLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallModel));
+            glUniformMatrix4fv(VerticalWallViewLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallView));
+            glUniformMatrix4fv(VerticalWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(VerticalWallProjection));
             glDrawArrays(GL_TRIANGLES, 0, 6);
             VerticalWallModel = glm::mat4(1.0f);
         }
@@ -258,9 +257,9 @@ void processInput(GLFWwindow *window)
 }
 int PacmanMovement(float x, float y, char direction)
 {
-    movement = true;
-    while(movement)
-    {
+    // movement = true; // For blocky movement, just as in the original PacMan
+    // while(movement)
+    // {
         // for debugging
         system("clear");
         std::cout << "Position(x, y): ";
@@ -280,7 +279,7 @@ int PacmanMovement(float x, float y, char direction)
                     return 0;
                 }
             }
-            if(direction == 'r') // collision from the right
+            else if(direction == 'r') // collision from the right
             {
                 if(PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth && PacmanView[3][0]+PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][1]+PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][1]-PacmanSize <= HorizontalWallCoords[i+1]+WallHeight)
                 {
@@ -288,7 +287,7 @@ int PacmanMovement(float x, float y, char direction)
                     return 0;
                 }
             }
-            if(direction == 'u')
+            else if(direction == 'u') // collision form the top
             {
                 if(PacmanView[3][1]+PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][1]+PacmanSize <= HorizontalWallCoords[i+1]+WallHeight && PacmanView[3][0]-PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth)
                 {
@@ -296,7 +295,7 @@ int PacmanMovement(float x, float y, char direction)
                     return 0;
                 }
             }
-            if(direction == 'd')
+            else if(direction == 'd') // collision from the bottom
             {
                 if(PacmanView[3][1]-PacmanSize <= HorizontalWallCoords[i+1]+WallHeight && PacmanView[3][1]-PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][0]-PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth)
                 {
@@ -305,8 +304,7 @@ int PacmanMovement(float x, float y, char direction)
                 }
             }
         }
-        PacmanView = glm::translate(PacmanView, glm::vec3(x*PacmanSpeed, y*PacmanSpeed, 0.0f));
-        movement = false;
-    }
+    // } for the while(movement) loop
+        PacmanView = glm::translate(PacmanView, glm::vec3(x*(PacmanSpeed), y*(PacmanSpeed), 0.0f));
     return 0;
 }
