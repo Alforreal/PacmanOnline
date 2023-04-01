@@ -276,6 +276,7 @@ int PacmanMovement(float x, float y, char direction)
                 if(PacmanView[3][0]-PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]+WallWidth && HorizontalWallCoords[i+1]+WallHeight >= PacmanView[3][1]-PacmanSize && HorizontalWallCoords[i+1]-WallHeight <= PacmanView[3][1]+PacmanSize)
                 {
                     std::cout << "Collision from the left side on x: " << PacmanView[3][0]-PacmanSize << ", y(upper): " << PacmanView[3][1]+PacmanSize << ", y(lower): " << PacmanView[3][1]-PacmanSize << "\n";
+                    PacmanView = glm::translate(PacmanView, glm::vec3(-x*(PacmanSpeed), -y*(PacmanSpeed), 0.0f));
                     return 0;
                 }
             }
@@ -284,6 +285,7 @@ int PacmanMovement(float x, float y, char direction)
                 if(PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth && PacmanView[3][0]+PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][1]+PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][1]-PacmanSize <= HorizontalWallCoords[i+1]+WallHeight)
                 {
                     std::cout << "Collision from the right side on x: " << PacmanView[3][0]+PacmanSize << ", y(upper): " << PacmanView[3][1]+PacmanSize << ", y(lower): " << PacmanView[3][1]-PacmanSize << "\n";
+                    PacmanView = glm::translate(PacmanView, glm::vec3(-x*(PacmanSpeed), -y*(PacmanSpeed), 0.0f));
                     return 0;
                 }
             }
@@ -292,6 +294,7 @@ int PacmanMovement(float x, float y, char direction)
                 if(PacmanView[3][1]+PacmanSize >= HorizontalWallCoords[i+1]-WallHeight && PacmanView[3][1]+PacmanSize <= HorizontalWallCoords[i+1]+WallHeight && PacmanView[3][0]-PacmanSize <= HorizontalWallCoords[i]+WallWidth && PacmanView[3][0]+PacmanSize >= HorizontalWallCoords[i]-WallWidth)
                 {
                     std::cout << "Collision from the top on y: " << PacmanView[3][1]+PacmanSize << ", x(right): " << PacmanView[3][0]+PacmanSize << ", x(left): " << PacmanView[3][0]-PacmanSize << "\n";
+                    PacmanView = glm::translate(PacmanView, glm::vec3(-x*(PacmanSpeed), -y*(PacmanSpeed), 0.0f));
                     return 0;
                 }
             }
