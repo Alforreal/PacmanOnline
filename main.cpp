@@ -11,6 +11,7 @@
 // #include <unistd.h> // used for usleep()
 
 bool movement = false;
+bool pmovement = false; // movement on a previous iteration
 float PacmanSize = 0.05f;
 float WallWidth = 0.05f;
 float WallHeight = 0.02f;
@@ -36,6 +37,7 @@ glm::mat4 PacmanView = glm::mat4(1.0f);
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 // int PacmanMovement(float x, float y, char direction);
 bool CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
+void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
 {
@@ -214,6 +216,7 @@ int main()
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
+        // LogMovement(PacmanView[3][0], PacmanView[3][1]);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -242,18 +245,111 @@ void processInput(GLFWwindow *window)
     else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
         // PacmanMovement(1, 0, 'r');
+        for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
+        {
+            if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            {
+                std::cout << "COLLISON\n";
+                movement = false;
+                if(pmovement)
+                {
+                    PacmanView = glm::translate(PacmanView, glm::vec3(-PacmanSpeed, 0.0f, 0.0f));
+                    pmovement = false;
+                }
+            }
+            else
+            {
+                movement = true;
+                pmovement = true;
+            }
+        }
+        if(movement)
+        {
+            PacmanView = glm::translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
+            LogMovement(PacmanView[3][0], PacmanView[3][1]);
+        }
     }
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        // PacmanMovement(0, 1, 'u');       
+        // PacmanMovement(0, 1, 'u');
+        for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
+        {
+            if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            {
+                std::cout << "COLLISON\n";
+                movement = false;
+                if(pmovement)
+                {
+                    PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
+                    pmovement = false;
+                }
+            }
+            else
+            {
+                movement = true;
+                pmovement = true;
+            }
+        }
+        if(movement)
+        {
+            PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, PacmanSpeed, 0.0f));
+            LogMovement(PacmanView[3][0], PacmanView[3][1]);
+        }  
     }
     else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
         // PacmanMovement(-1, 0, 'l');
+        for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
+        {
+            if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            {
+                std::cout << "COLLISON\n";
+                movement = false;
+                if(pmovement)
+                {
+                    PacmanView = glm::translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
+                    pmovement = false;
+                }
+            }
+            else
+            {
+                movement = true;
+                pmovement = true;
+            }
+        }
+        if(movement)
+        {
+            PacmanView = glm::translate(PacmanView, glm::vec3(-PacmanSpeed, 0.0f, 0.0f));
+            LogMovement(PacmanView[3][0], PacmanView[3][1]);
+        }
+        
     }
     else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        // PacmanMovement(0, -1, 'd');        
+        // PacmanMovement(0, -1, 'd');
+        for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
+        {
+            if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            {
+                std::cout << "COLLISON\n";
+                movement = false;
+                if(pmovement)
+                {
+                    PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, PacmanSpeed, 0.0f)); 
+                    pmovement = false;
+                }
+            }
+            else
+            {
+                movement = true;
+                pmovement = true;
+            }
+        }
+        if(movement)
+        {
+            PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));  
+            LogMovement(PacmanView[3][0], PacmanView[3][1]);
+        }
     }
 }
 // This code should be improved for efficiency, for now it is what it is
@@ -264,6 +360,25 @@ bool CollisionDetection(float x0, float y0, float width0, float height0, float x
     {
         if(y0+height0 <= y1+height1)
         {
+            if(x0-width0 <= x1+width1 && x0+width0 >= x1-width1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    // collision from the bottom:
+    if(y0-height0 <= y1+height1)
+    {
+        if(y0-height0 >= y1-height1)
+        {
             return true;
         }
         else
@@ -271,12 +386,27 @@ bool CollisionDetection(float x0, float y0, float width0, float height0, float x
             return false;
         }
     }
-    // collision from the right:
-    if(x0+width0)
+    // collision from the left:
+    if(x0-width0 <= x1+width1)
+    {
+        if(x0-width0 >= x1-width1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     else
     {
         return false;
     }
+}
+void LogMovement(float x, float y)
+{
+    system("clear");
+    std::cout << "Position(x, y): " << x << ", " << y << "\n";
 }
 /*
 // Old variation of the collision system
