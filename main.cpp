@@ -34,7 +34,8 @@ float VerticalWallCoords[] {
 };
 glm::mat4 PacmanView = glm::mat4(1.0f);
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
-int PacmanMovement(float x, float y, char direction);
+// int PacmanMovement(float x, float y, char direction);
+bool CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 void processInput(GLFWwindow *window);
 int main()
 {
@@ -240,21 +241,45 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
     else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-        PacmanMovement(1, 0, 'r');
+        // PacmanMovement(1, 0, 'r');
     }
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        PacmanMovement(0, 1, 'u');       
+        // PacmanMovement(0, 1, 'u');       
     }
     else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-        PacmanMovement(-1, 0, 'l');
+        // PacmanMovement(-1, 0, 'l');
     }
     else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        PacmanMovement(0, -1, 'd');        
+        // PacmanMovement(0, -1, 'd');        
     }
 }
+// This code should be improved for efficiency, for now it is what it is
+bool CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1) // width and height are counted from the center of the rectangle
+{
+    // collision from the top:
+    if(y0+height0 >= y1-height1)
+    {
+        if(y0+height0 <= y1+height1)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    // collision from the right:
+    if(x0+width0)
+    else
+    {
+        return false;
+    }
+}
+/*
+// Old variation of the collision system
 int PacmanMovement(float x, float y, char direction)
 {
     // movement = true; // For blocky movement, just as in the original PacMan
@@ -311,3 +336,4 @@ int PacmanMovement(float x, float y, char direction)
         PacmanView = glm::translate(PacmanView, glm::vec3(x*(PacmanSpeed), y*(PacmanSpeed), 0.0f));
     return 0;
 }
+*/
