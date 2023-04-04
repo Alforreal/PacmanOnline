@@ -36,7 +36,7 @@ float VerticalWallCoords[] {
 glm::mat4 PacmanView = glm::mat4(1.0f);
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 // int PacmanMovement(float x, float y, char direction);
-bool CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
+int CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
@@ -211,11 +211,15 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 6);
             VerticalWallModel = glm::mat4(1.0f);
         }
+
+        // detecting collision:
+
         // uniform values for the wall
         // ---------------------------
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
+
         // LogMovement(PacmanView[3][0], PacmanView[3][1]);
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -250,6 +254,7 @@ void processInput(GLFWwindow *window)
             if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
             {
                 std::cout << "COLLISON\n";
+                LogMovement(PacmanView[3][0], PacmanView[3][1]);
                 movement = false;
                 if(pmovement)
                 {
@@ -277,6 +282,7 @@ void processInput(GLFWwindow *window)
             if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
             {
                 std::cout << "COLLISON\n";
+                LogMovement(PacmanView[3][0], PacmanView[3][1]);
                 movement = false;
                 if(pmovement)
                 {
@@ -304,6 +310,7 @@ void processInput(GLFWwindow *window)
             if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
             {
                 std::cout << "COLLISON\n";
+                LogMovement(PacmanView[3][0], PacmanView[3][1]);
                 movement = false;
                 if(pmovement)
                 {
@@ -332,6 +339,7 @@ void processInput(GLFWwindow *window)
             if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
             {
                 std::cout << "COLLISON\n";
+                LogMovement(PacmanView[3][0], PacmanView[3][1]);
                 movement = false;
                 if(pmovement)
                 {
@@ -353,25 +361,32 @@ void processInput(GLFWwindow *window)
     }
 }
 // This code should be improved for efficiency, for now it is what it is
-bool CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1) // width and height are counted from the center of the rectangle
+int CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1) // width and height are counted from the center of the rectangle
 {
     // collision from the top:
     if(y0+height0 >= y1-height1)
     {
         if(y0+height0 <= y1+height1)
         {
-            if(x0-width0 <= x1+width1 && x0+width0 >= x1-width1)
+            if(x0-width0 <= x1+width1)
             {
-                return true;
+                if(x0+width0 >= x1-width1)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
             }
             else
             {
-                return false;
+                return 0;
             }
         }
         else
         {
-            return false;
+            return 0;
         }
     }
     // collision from the bottom:
@@ -379,11 +394,25 @@ bool CollisionDetection(float x0, float y0, float width0, float height0, float x
     {
         if(y0-height0 >= y1-height1)
         {
-            return true;
+            if(x0-width0 <= x1+width1)
+            {
+                if(x0+width0 >= x1-width1)
+                {
+                    return 3;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return 0;
+            }
         }
         else
         {
-            return false;
+            return 0;
         }
     }
     // collision from the left:
