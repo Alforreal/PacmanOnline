@@ -360,6 +360,23 @@ void processInput(GLFWwindow *window)
         }
     }
 }
+// COLLISION SYSTEM 
+// The function returns a bit cryptic numbers, so here's explanation of outputs:
+// This collision system is designed for the PacMan, and he's one of the only characters that move, so I focus on PacMan and check if it collides
+// In the code I use x0, y0, width0 and height0 as inputs for the PacMan, and x1, y1, width1 and height1 as the wall, or anything else that collides with the PacMan really
+/* 
+         1
+         ↓
+     ----------
+     |        |
+ 4 → | PacMan | ← 2
+     |        |
+     ----------
+         ↑
+         3
+
+*/
+// If there's no collision, the funciton will return 0 
 // This code should be improved for efficiency, for now it is what it is
 int CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1) // width and height are counted from the center of the rectangle
 {
@@ -420,16 +437,56 @@ int CollisionDetection(float x0, float y0, float width0, float height0, float x1
     {
         if(x0-width0 >= x1-width1)
         {
-            return true;
+            if(y0+height0 >= y1-height1)
+            {
+                if(y0-height0 <= y1+height1)
+                {
+                    return 4;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
         }
         else
         {
-            return false;
+            return 0;
         }
     }
     else
     {
-        return false;
+        return 0;
+    }
+    // collision from the right:
+    if(x0+width0 >= x1-width1)
+    {
+        if(x0+width0 <= x1+width1)
+        {
+            if(y0+height0 >= y1-height1)
+            {
+                if(y0-height0 <= y1+height1)
+                {
+                    return 2;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        return 0;
     }
 }
 void LogMovement(float x, float y)
