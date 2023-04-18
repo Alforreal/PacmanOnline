@@ -33,9 +33,7 @@ float HorizontalWallCoords [] {
 float VerticalWallCoords[] {
     0.3f, 0.3f
 };
-glm::vec4 InputColor = {
-    1.0f, 1.0f, 0.0f, 1.0f
-};
+glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
 int collision;
 glm::mat4 PacmanView = glm::mat4(1.0f);
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
@@ -183,13 +181,15 @@ int main()
 
         unsigned int PacmanViewLoc = glGetUniformLocation(PacMan.ID, "Pview");
         glUniformMatrix4fv(PacmanViewLoc, 1, GL_FALSE, glm::value_ptr(PacmanView));
-
+        
+        unsigned int PacmanColorLoc = glGetUniformLocation(PacMan.ID, "InputColor");
+        glUniform4fv(PacmanColorLoc, 1, glm::value_ptr(InputColor));
+        
         unsigned int PacmanProjectionLoc = glGetUniformLocation(PacMan.ID, "Pprojection");
         glUniformMatrix4fv(PacmanProjectionLoc, 1, GL_FALSE, glm::value_ptr(PacmanProjection));
         unsigned int HorizontalWallModelLoc = glGetUniformLocation(HorizontalWall.ID, "Wmodel");
         unsigned int HorizontalWallViewLoc = glGetUniformLocation(HorizontalWall.ID, "Wview");
         unsigned int HorizontalWallProjectionLoc = glGetUniformLocation(HorizontalWall.ID, "Wprojection");
-        glUniform4fv(glGetUniformLocation(PacMan.ID, "InputCollor"), 1, glm::value_ptr(InputColor));
         glBindVertexArray(HorizontalWallVAO);
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
@@ -283,9 +283,25 @@ void processInput(GLFWwindow *window)
             collision = CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
             if(collision == 1)
             {
-                std::cout << "Collision from the top at coordinates: (" << PacmanView[3][0] << ", " << PacmanView[3][1] << "\n";
-
+                // std::cout << "Collision from the top at coordinates: (" << PacmanView[3][0] << ", " << PacmanView[3][1] << ")\n";
+                PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
+                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
+            else if(collision == 2)
+            {
+                // std::cout << "Collisiton from the right at coordinates: (" << PacmanView[3][0] << ", " << PacmanView[3][1] << ")\n";
+                PacmanView = glm::translate(PacmanView, glm::vec3(-PacmanSpeed, 0.0f, 0.0f));
+                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            }
+            else
+            {
+                movement = true;
+            }
+        }
+        if(movement)
+        {
+            PacmanView = translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
+            InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
         }
     }
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
