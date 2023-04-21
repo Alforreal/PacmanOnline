@@ -289,8 +289,7 @@ void processInput(GLFWwindow *window)
             }
             else if(collision == 2)
             {
-                // std::cout << "Collisiton from the right at coordinates: (" << PacmanView[3][0] << ", " << PacmanView[3][1] << ")\n";
-                PacmanView = glm::translate(PacmanView, glm::vec3(-PacmanSpeed, 0.0f, 0.0f));
+                // PacmanView = glm::translate(PacmanView, glm::vec3())
                 InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
             else
