@@ -161,6 +161,7 @@ int main()
     {
         // input
         // -----
+        movement = true;
         processInput(window);
         
         
@@ -281,26 +282,20 @@ void processInput(GLFWwindow *window)
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+= 2)
         {
             collision = CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
-            if(collision == 1)
+            if(collision == 0)
             {
-                // std::cout << "Collision from the top at coordinates: (" << PacmanView[3][0] << ", " << PacmanView[3][1] << ")\n";
-                PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
-                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-            }
-            else if(collision == 2)
-            {
-                // PacmanView = glm::translate(PacmanView, glm::vec3())
-                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                // movement = true;
             }
             else
             {
-                movement = true;
+                movement = false;
             }
         }
         if(movement)
         {
             PacmanView = translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
             InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+            LogMovement(PacmanView[3][0], PacmanView[3][1]);
         }
     }
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
@@ -308,21 +303,30 @@ void processInput(GLFWwindow *window)
         // PacmanMovement(0, 1, 'u');
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
-            if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            // if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            // {
+            //     std::cout << "COLLISON\n";
+            //     LogMovement(PacmanView[3][0], PacmanView[3][1]);
+            //     movement = false;
+            //     if(pmovement)
+            //     {
+            //         PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
+            //         pmovement = false;
+            //     }
+            // }
+            // else
+            // {
+            //     movement = true;
+            //     pmovement = true;
+            // }
+            collision = CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
+            if(collision == 0)
             {
-                std::cout << "COLLISON\n";
-                LogMovement(PacmanView[3][0], PacmanView[3][1]);
-                movement = false;
-                if(pmovement)
-                {
-                    PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
-                    pmovement = false;
-                }
+                // movement = true;
             }
             else
             {
-                movement = true;
-                pmovement = true;
+                movement = false;
             }
         }
         if(movement)
@@ -336,21 +340,30 @@ void processInput(GLFWwindow *window)
         // PacmanMovement(-1, 0, 'l');
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
-            if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            // if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            // {
+            //     std::cout << "COLLISON\n";
+            //     LogMovement(PacmanView[3][0], PacmanView[3][1]);
+            //     movement = false;
+            //     if(pmovement)
+            //     {
+            //         PacmanView = glm::translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
+            //         pmovement = false;
+            //     }
+            // }
+            // else
+            // {
+            //     movement = true;
+            //     pmovement = true;
+            // }
+            collision = CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
+            if(collision == 0)
             {
-                std::cout << "COLLISON\n";
-                LogMovement(PacmanView[3][0], PacmanView[3][1]);
-                movement = false;
-                if(pmovement)
-                {
-                    PacmanView = glm::translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
-                    pmovement = false;
-                }
+                // movement = true;
             }
             else
             {
-                movement = true;
-                pmovement = true;
+                movement = false;
             }
         }
         if(movement)
@@ -365,21 +378,30 @@ void processInput(GLFWwindow *window)
         // PacmanMovement(0, -1, 'd');
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
-            if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            // if(CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight))
+            // {
+            //     std::cout << "COLLISON\n";
+            //     LogMovement(PacmanView[3][0], PacmanView[3][1]);
+            //     movement = false;
+            //     if(pmovement)
+            //     {
+            //         PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, PacmanSpeed, 0.0f)); 
+            //         pmovement = false;
+            //     }
+            // }
+            // else
+            // {
+            //     movement = true;
+            //     pmovement = true;
+            // }
+            collision = CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
+            if(collision == 0)
             {
-                std::cout << "COLLISON\n";
-                LogMovement(PacmanView[3][0], PacmanView[3][1]);
-                movement = false;
-                if(pmovement)
-                {
-                    PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, PacmanSpeed, 0.0f)); 
-                    pmovement = false;
-                }
+                // movement = true;
             }
             else
             {
-                movement = true;
-                pmovement = true;
+                movement = false;
             }
         }
         if(movement)
@@ -488,30 +510,38 @@ int CollisionDetection(float x0, float y0, float width0, float height0, float x1
         return 0;
     }
     // collision from the right:
-    if(x0+width0 >= x1-width1)
+    // if(x0+width0 >= x1-width1)
+    // {
+    //     if(x0+width0 <= x1+width1)
+    //     {
+    //         if(y0+height0 >= y1-height1)
+    //         {
+    //             if(y0-height0 <= y1+height1)
+    //             {
+    //                 return 2;
+    //             }
+    //             else
+    //             {
+    //                 return 0;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             return 0;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         return 0;
+    //     }
+    // }
+    // else
+    // {
+    //     return 0;
+    // }
+    if(width0+width1 >= x0+x1)
     {
-        if(x0+width0 <= x1+width1)
-        {
-            if(y0+height0 >= y1-height1)
-            {
-                if(y0-height0 <= y1+height1)
-                {
-                    return 2;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
+        return 2;
     }
     else
     {
