@@ -39,6 +39,7 @@ glm::mat4 PacmanView = glm::mat4(1.0f);
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 // int PacmanMovement(float x, float y, char direction);
 int CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
+int RightCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
@@ -281,7 +282,7 @@ void processInput(GLFWwindow *window)
         // }
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+= 2)
         {
-            collision = CollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
+            collision = RightCollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
             if(collision == 0)
             {
                 // movement = true;
@@ -441,6 +442,10 @@ int RightCollisionDetection(float x0, float y0, float width0, float height0, flo
         {
             return 0;
         }
+    }
+    else
+    {
+        return 0;
     }
 }
 int CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1) // width and height are counted from the center of the rectangle
