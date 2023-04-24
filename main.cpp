@@ -431,94 +431,16 @@ void processInput(GLFWwindow *window)
 // This code should be improved for efficiency, for now it is what it is
 int CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1) // width and height are counted from the center of the rectangle
 {
-    // collision from the top:
-    if(y0+height0 >= y1-height1)
-    {
-        if(y0+height0 <= y1+height1)
-        {
-            if(x0-width0 <= x1+width1)
-            {
-                if(x0+width0 >= x1-width1)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    // collision from the bottom:
-    if(y0-height0 <= y1+height1)
-    {
-        if(y0-height0 >= y1-height1)
-        {
-            if(x0-width0 <= x1+width1)
-            {
-                if(x0+width0 >= x1-width1)
-                {
-                    return 3;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    // collision from the left:
-    if(x0-width0 <= x1+width1)
-    {
-        if(x0-width0 >= x1-width1)
-        {
-            if(y0+height0 >= y1-height1)
-            {
-                if(y0-height0 <= y1+height1)
-                {
-                    return 4;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-    // collision from the right:
-    // if(x0+width0 >= x1-width1)
+    // // collision from the top:
+    // if(y0+height0 >= y1-height1)
     // {
-    //     if(x0+width0 <= x1+width1)
+    //     if(y0+height0 <= y1+height1)
     //     {
-    //         if(y0+height0 >= y1-height1)
+    //         if(x0-width0 <= x1+width1)
     //         {
-    //             if(y0-height0 <= y1+height1)
+    //             if(x0+width0 >= x1-width1)
     //             {
-    //                 return 2;
+    //                 return 1;
     //             }
     //             else
     //             {
@@ -535,10 +457,88 @@ int CollisionDetection(float x0, float y0, float width0, float height0, float x1
     //         return 0;
     //     }
     // }
+    // // collision from the bottom:
+    // if(y0-height0 <= y1+height1)
+    // {
+    //     if(y0-height0 >= y1-height1)
+    //     {
+    //         if(x0-width0 <= x1+width1)
+    //         {
+    //             if(x0+width0 >= x1-width1)
+    //             {
+    //                 return 3;
+    //             }
+    //             else
+    //             {
+    //                 return 0;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             return 0;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         return 0;
+    //     }
+    // }
+    // // collision from the left:
+    // if(x0-width0 <= x1+width1)
+    // {
+    //     if(x0-width0 >= x1-width1)
+    //     {
+    //         if(y0+height0 >= y1-height1)
+    //         {
+    //             if(y0-height0 <= y1+height1)
+    //             {
+    //                 return 4;
+    //             }
+    //             else
+    //             {
+    //                 return 0;
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         return 0;
+    //     }
+    // }
     // else
     // {
     //     return 0;
     // }
+    // // collision from the right:
+    // // if(x0+width0 >= x1-width1)
+    // // {
+    // //     if(x0+width0 <= x1+width1)
+    // //     {
+    // //         if(y0+height0 >= y1-height1)
+    // //         {
+    // //             if(y0-height0 <= y1+height1)
+    // //             {
+    // //                 return 2;
+    // //             }
+    // //             else
+    // //             {
+    // //                 return 0;
+    // //             }
+    // //         }
+    // //         else
+    // //         {
+    // //             return 0;
+    // //         }
+    // //     }
+    // //     else
+    // //     {
+    // //         return 0;
+    // //     }
+    // // }
+    // // else
+    // // {
+    // //     return 0;
+    // // }
     if(width0+width1 >= x0+x1)
     {
         return 2;
