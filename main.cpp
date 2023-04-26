@@ -32,7 +32,13 @@ float HorizontalWallCoords [] {
 };
 float VerticalWallCoords[] {
     0.3f, 0.3f,
-    0.4f, 0.4f
+    0.4f, 0.4f,
+    -0.3f, -0.3f,
+    -0.4f, -0.4f,
+    0.3f, -0.3f,
+    0.4f, -0.4f,
+    -0.3f, 0.3f,
+    -0.4f, 0.4f
 };
 glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
 int collision;
@@ -169,7 +175,6 @@ int main()
         // -----
         movement = true;
         processInput(window);
-        
         // render
         // ------
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -265,12 +270,28 @@ void processInput(GLFWwindow *window)
                 movement = false;
                 PacmanView = translate(PacmanView, glm::vec3(-PacmanSpeed, 0.0f, 0.0f));
                 InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-                timeout --;
+            }
+        }
+        for(int i = 0, n = sizeof(VerticalWallCoords)/sizeof(float); i < n; i+= 2)
+        {
+            collision = RCollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, VerticalWallCoords[i], VerticalWallCoords[i+1], WallHeight, WallWidth);
+            if(collision != 0)
+            {
+                PacmanView = translate(PacmanView, glm::vec3(-PacmanSpeed, 0.0f, 0.0f));
+                movement = false;
+                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
         }
         if(movement)
         {
-            PacmanView = translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
+            if(PacmanView[3][0] >= 0.9f)
+            {
+                PacmanView[3][0] = -0.9f;
+            }
+            else
+            {
+                PacmanView = translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
+            }
             InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
             LogMovement(PacmanView[3][0], PacmanView[3][1]);
         }
@@ -281,6 +302,16 @@ void processInput(GLFWwindow *window)
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
             collision = TCollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
+            if(collision != 0)
+            {
+                PacmanView = translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
+                movement = false;
+                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            }
+        }
+        for(int i = 0, n = sizeof(VerticalWallCoords)/sizeof(float); i < n; i+=2)
+        {
+            collision = TCollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, VerticalWallCoords[i], VerticalWallCoords[i+1], WallHeight, WallWidth);
             if(collision != 0)
             {
                 PacmanView = translate(PacmanView, glm::vec3(0.0f, -PacmanSpeed, 0.0f));
@@ -308,6 +339,16 @@ void processInput(GLFWwindow *window)
                 InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
         }
+        for(int i = 0, n = sizeof(VerticalWallCoords)/sizeof(float); i < n; i+=2)
+        {
+            collision = LCollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, VerticalWallCoords[i], VerticalWallCoords[i+1], WallHeight, WallWidth);
+            if(collision != 0)
+            {
+                PacmanView = glm::translate(PacmanView, glm::vec3(PacmanSpeed, 0.0f, 0.0f));
+                movement = false;
+                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            }
+        }
         if(movement)
         {
             PacmanView = glm::translate(PacmanView, glm::vec3(-PacmanSpeed, 0.0f, 0.0f));
@@ -321,6 +362,16 @@ void processInput(GLFWwindow *window)
         for(int i = 0, n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i+=2)
         {
             collision = BCollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, HorizontalWallCoords[i], HorizontalWallCoords[i+1], WallWidth, WallHeight);
+            if(collision != 0)
+            {
+                PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, PacmanSpeed, 0.0f));
+                movement = false;
+                InputColor = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+            }
+        }
+        for(int i = 0, n = sizeof(VerticalWallCoords)/sizeof(float); i < n; i+=2)
+        {
+            collision = BCollisionDetection(PacmanView[3][0], PacmanView[3][1], PacmanSize, PacmanSize, VerticalWallCoords[i], VerticalWallCoords[i+1], WallHeight, WallWidth);
             if(collision != 0)
             {
                 PacmanView = glm::translate(PacmanView, glm::vec3(0.0f, PacmanSpeed, 0.0f));
