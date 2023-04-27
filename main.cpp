@@ -11,13 +11,13 @@
 // #include <unistd.h> // used for usleep()
 
 bool movement = false;
-bool pmovement = false; // movement on a previous iteration
-float PacmanSize = 0.05f;
-float WallWidth = 0.05f;
-float WallHeight = 0.02f;
-float PacmanSpeed = 0.015f;
-float HorizontalSquare [512];
-float VerticalSquare [512];
+bool pmovement = false; // movement on a previous iteration, not yet implemented
+const float PacmanSize = 0.05f;
+const float WallWidth = 0.05f;
+const float WallHeight = 0.02f;
+const float PacmanSpeed = 0.015f;
+float HorizontalSquare [(int) (2/WallWidth*2*2)];
+float VerticalSquare [(int) (2/WallWidth*2*2)];
 float HorizontalTestPlayground [24] {
     0.5f, 0.5f,
     0.6f, 0.4f,
@@ -42,40 +42,46 @@ float VerticalTestPlayground [16] {
     -0.3f, 0.3f,
     -0.4f, 0.4f
 };
-float HorizontalWallCoords[512];
-float VerticalWallCoords[512];
+float HorizontalWallCoords[sizeof(HorizontalSquare)/sizeof(float)];
+float VerticalWallCoords[sizeof(VerticalTestPlayground)/sizeof(float)];
 glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
 int collision;
 glm::mat4 PacmanView = glm::mat4(1.0f);
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
-// int PacmanMovement(float x, float y, char direction);
-// int CollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 void MakeSquare(float width, float height);
 int RCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 int LCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 int TCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 int BCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
-int timeout = 0; // used for a timeout for collision
+int timeout = 0; // used for a timeout for collision, not yet implemented
 void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
 {
     MakeSquare(WallWidth, WallHeight);
-    for(int i = 0, n = sizeof(HorizontalTestPlayground)/sizeof(float); i < n; i++)
+    // for(int i = 0, n = sizeof(HorizontalTestPlayground)/sizeof(float); i < n; i++)
+    // {
+    //     HorizontalWallCoords[i] = HorizontalTestPlayground[i];
+    // }
+    // for(int i = sizeof(HorizontalTestPlayground)/sizeof(float), n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i++)
+    // {
+    //     HorizontalWallCoords[i] = 1.5f; // I call this move "Yeet under the carpet, where nobody sees it"
+    // }
+    // for(int i = 0, n = sizeof(VerticalTestPlayground)/sizeof(float); i < n; i++)
+    // {
+    //     VerticalWallCoords[i] = VerticalTestPlayground[i];
+    // }
+    // for(int i = sizeof(VerticalTestPlayground)/sizeof(float), n = sizeof(VerticalWallCoords)/sizeof(float); i < n; i++)
+    // {
+    //     VerticalWallCoords[i] = 1.5f; // I call this move "Yeet under the carpet, where nobody sees it"
+    // }
+    for(int i = 0, n = sizeof(HorizontalSquare)/sizeof(float); i < n; i++)
     {
-        HorizontalWallCoords[i] = HorizontalTestPlayground[i];
+        HorizontalWallCoords[i] = HorizontalSquare[i];
     }
-    for(int i = sizeof(HorizontalTestPlayground)/sizeof(float), n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i++)
+    for(int i = 0, n = sizeof(VerticalSquare)/sizeof(float); i < n; i++)
     {
-        HorizontalWallCoords[i] = 1.5f; // I call this move "Yeet under the carpet, where nobody sees it"
-    }
-    for(int i = 0, n = sizeof(VerticalTestPlayground)/sizeof(float); i < n; i++)
-    {
-        VerticalWallCoords[i] = VerticalTestPlayground[i];
-    }
-    for(int i = sizeof(VerticalTestPlayground)/sizeof(float), n = sizeof(VerticalWallCoords)/sizeof(float); i < n; i++)
-    {
-        VerticalWallCoords[i] = 1.5f; // I call this move "Yeet under the carpet, where nobody sees it"
+        VerticalWallCoords[i] = VerticalSquare[i];
     }
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -584,26 +590,26 @@ int BCollisionDetection(float x0, float y0, float width0, float height0, float x
         return 0;
     }
 }
-void MakeSquare(float width, float height)
+void MakeSquare(float width, float height) // doesn't work as intended yet
 {
-    for(int i = 0, n = 2/WallWidth*2; i < n; i+=2)
+    for(int i = 0, n = 2/width*2*2; i < n; i+=2)
     {
-        HorizontalSquare[i] = -1.0f+i*WallWidth;
+        HorizontalSquare[i] = -1.0f+i*width;
         HorizontalSquare[i+1] = 0.8f;
     }
-    for(int i = 0, n = 2/WallWidth*2; i < n; i+=2)
+    for(int i = 0, n = 2/width*2; i < n; i+=2)
     {
-        HorizontalSquare[i] = -1.0f+i*WallWidth;
+        HorizontalSquare[i] = 1.0f-i*width;
         HorizontalSquare[i+1] = -0.8f;
     }
-    for(int i = 0, n = 2/WallHeight*2; i < n; i+=2)
+    for(int i = 0, n = 2/height*2; i < n; i+=2)
     {
         VerticalSquare[i] = 0.8f;
-        VerticalSquare[i+1] = -1.0f+i*WallHeight;
+        VerticalSquare[i+1] = -1.0f+i*height;
     }
-    for(int i = 0, n = 2/WallHeight*2; i < n; i+=2)
+    for(int i = 0, n = 2/height*2; i < n; i+=2)
     {
         VerticalSquare[i] = -0.8f;
-        VerticalSquare[i+1] = -1.0f+i*WallHeight;
+        VerticalSquare[i+1] = -1.0f+i*height;
     }
 }
