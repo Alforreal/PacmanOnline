@@ -16,6 +16,9 @@ float PacmanSize = 0.05f;
 float WallWidth = 0.05f;
 float WallHeight = 0.02f;
 float PacmanSpeed = 0.015f;
+float HorizontalSquare [(int) (2/WallWidth*2*2)];
+float VerticalSquare [(int) (2/WallHeight*2*2)];
+void MakeSquare(void);
 float HorizontalTestPlayground [24] {
     0.5f, 0.5f,
     0.6f, 0.4f,
@@ -571,5 +574,12 @@ int BCollisionDetection(float x0, float y0, float width0, float height0, float x
     else
     {
         return 0;
+    }
+}
+void MakeSquare(void)
+{
+    for(int i = 0, n = 2/WallWidth*2; i < n; i++)
+    {
+        
     }
 }
