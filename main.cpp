@@ -59,22 +59,6 @@ void processInput(GLFWwindow *window);
 int main()
 {
     MakeSquare(WallWidth, WallWidth);
-    // for(int i = 0, n = sizeof(HorizontalTestPlayground)/sizeof(float); i < n; i++)
-    // {
-    //     HorizontalWallCoords[i] = HorizontalTestPlayground[i];
-    // }
-    // for(int i = sizeof(HorizontalTestPlayground)/sizeof(float), n = sizeof(HorizontalWallCoords)/sizeof(float); i < n; i++)
-    // {
-    //     HorizontalWallCoords[i] = 1.5f; // I call this move "Yeet under the carpet, where nobody sees it"
-    // }
-    // for(int i = 0, n = sizeof(VerticalTestPlayground)/sizeof(float); i < n; i++)
-    // {
-    //     VerticalWallCoords[i] = VerticalTestPlayground[i];
-    // }
-    // for(int i = sizeof(VerticalTestPlayground)/sizeof(float), n = sizeof(VerticalWallCoords)/sizeof(float); i < n; i++)
-    // {
-    //     VerticalWallCoords[i] = 1.5f; // I call this move "Yeet under the carpet, where nobody sees it"
-    // }
     for(int i = 0, n = sizeof(HorizontalSquare)/sizeof(float); i < n; i++)
     {
         HorizontalWallCoords[i] = HorizontalSquare[i];
