@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 // #include <unistd.h> // used for usleep()
 
+const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 bool movement = false;
 bool pmovement = false; // movement on a previous iteration, not yet implemented
 const float PacmanSize = 0.05f;
@@ -43,11 +44,10 @@ float VerticalTestPlayground [16] {
     -0.4f, 0.4f
 };
 float HorizontalWallCoords[sizeof(HorizontalSquare)/sizeof(float)];
-float VerticalWallCoords[sizeof(VerticalTestPlayground)/sizeof(float)];
+float VerticalWallCoords[sizeof(VerticalSquare)/sizeof(float)];
 glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-int collision;
 glm::mat4 PacmanView = glm::mat4(1.0f);
-const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
+int collision;
 void MakeSquare(float width, float height);
 int RCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 int LCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
@@ -58,7 +58,7 @@ void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
 {
-    MakeSquare(WallWidth, WallHeight);
+    MakeSquare(WallWidth, WallWidth);
     // for(int i = 0, n = sizeof(HorizontalTestPlayground)/sizeof(float); i < n; i++)
     // {
     //     HorizontalWallCoords[i] = HorizontalTestPlayground[i];
@@ -590,16 +590,16 @@ int BCollisionDetection(float x0, float y0, float width0, float height0, float x
         return 0;
     }
 }
-void MakeSquare(float width, float height) // doesn't work as intended yet
+void MakeSquare(float width, float height) // WIP
 {
-    for(int i = 0, n = 2/width*2*2; i < n; i+=2)
+    for(int i = 0, n = 2/width*2; i < n; i+=2)
     {
         HorizontalSquare[i] = -1.0f+i*width;
         HorizontalSquare[i+1] = 0.8f;
     }
-    for(int i = 0, n = 2/width*2; i < n; i+=2)
+    for(int i = 2/width*2, n = 2/width*2*2; i < n; i+=2)
     {
-        HorizontalSquare[i] = 1.0f-i*width;
+        HorizontalSquare[i] = -1.0f+i*width;
         HorizontalSquare[i+1] = -0.8f;
     }
     for(int i = 0, n = 2/height*2; i < n; i+=2)
@@ -607,7 +607,7 @@ void MakeSquare(float width, float height) // doesn't work as intended yet
         VerticalSquare[i] = 0.8f;
         VerticalSquare[i+1] = -1.0f+i*height;
     }
-    for(int i = 0, n = 2/height*2; i < n; i+=2)
+    for(int i = 2/height*2, n = 2/height*2*2; i < n; i+=2)
     {
         VerticalSquare[i] = -0.8f;
         VerticalSquare[i+1] = -1.0f+i*height;
