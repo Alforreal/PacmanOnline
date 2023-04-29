@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "Headers/Shader.h"
 #include <stdlib.h>
 // #include <glm/ext/matrix_clip_space.hpp> // previously didn't work without them, now it does, idk why
 // #include <glm/ext/matrix_transform.hpp> //required for matrix transformation, or at least I thought so, code works without them
@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Headers/Collision.h"
+#include "Maps/TestPlayground.h"
 // #include <unistd.h> // used for usleep()
 
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
@@ -19,40 +21,12 @@ const float WallHeight = 0.02f;
 const float PacmanSpeed = 0.015f;
 float HorizontalSquare [(int) (2/WallWidth*2*2)];
 float VerticalSquare [(int) (2/WallWidth*2*2)];
-float HorizontalTestPlayground [24] {
-    0.5f, 0.5f,
-    0.6f, 0.4f,
-    0.4f, 0.6f,
-    -0.5f, 0.5f,
-    -0.6f, 0.4f,
-    -0.4f, 0.6f,
-    0.5f, -0.5f,
-    0.6f, -0.4f,
-    0.4f, -0.6f,
-    -0.5f, -0.5f,
-    -0.6f, -0.4f,
-    -0.4f, -0.6f
-};
-float VerticalTestPlayground [16] {
-    0.3f, 0.3f,
-    0.4f, 0.4f,
-    -0.3f, -0.3f,
-    -0.4f, -0.4f,
-    0.3f, -0.3f,
-    0.4f, -0.4f,
-    -0.3f, 0.3f,
-    -0.4f, 0.4f
-};
 float HorizontalWallCoords[sizeof(HorizontalSquare)/sizeof(float)];
 float VerticalWallCoords[sizeof(VerticalSquare)/sizeof(float)];
 glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
 glm::mat4 PacmanView = glm::mat4(1.0f);
 int collision;
 void MakeSquare(float width, float height);
-int RCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
-int LCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
-int TCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
-int BCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1);
 int timeout = 0; // used for a timeout for collision, not yet implemented
 void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
@@ -423,156 +397,10 @@ void processInput(GLFWwindow *window)
         InputColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
     }
 }
-// COLLISION SYSTEM 
-// The function returns a bit cryptic numbers, so here's explanation of outputs:
-// This collision system is designed for the PacMan, and he's one of the only characters that move, so I focus on PacMan and check if it collides
-// In the code I use x0, y0, width0 and height0 as inputs for the PacMan, and x1, y1, width1 and height1 as the wall, or anything else that collides with the PacMan really
-/* 
-         1
-         ↓
-     ----------
-     |        |
- 4 → | PacMan | ← 2
-     |        |
-     ----------
-         ↑
-         3
-
-*/
-// If there's no collision, the funciton will return 0 
-// This code should be improved for efficiency, for now it is what it is
 void LogMovement(float x, float y)
 {
     system("clear");
     std::cout << "Position(x, y): " << x << ", " << y << "\n";
-}
-int RCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1)
-{
-    if(x0+width0 >= x1-width1)
-    {
-        if(x0+width0 <= x1+width1)
-        {
-            if(y0+height0 >= y1-height1)
-            {
-                if(y0-height0 <= y1+height1)
-                {
-                    return 2;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-}
-int LCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1)
-{
-    if(x0-width0 <= x1+width1)
-    {
-        if(x0-width0 >= x1-width1)
-        {
-            if(y0+height0 >= y1-height1)
-            {
-                if(y0-height0 <= y1+height1)
-                {
-                    return 4;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-}
-int TCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1)
-{
-    if(y0+height0 >= y1-height1)
-    {
-        if(y0+height0 <= y1+height1)
-        {
-            if(x0-width0 <= x1+width1)
-            {
-                if(x0+width0 >= x1-width1)
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        return 0;
-    }
-}
-int BCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1)
-{
-    if(y0-height0 <= y1+height1)
-    {
-        if(y0-height0 >= y1-height1)
-        {
-            if(x0-width0 <= x1+width1)
-            {
-                if(x0+width0 >= x1-width1)
-                {
-                    return 3;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-    else
-    {
-        return 0;
-    }
 }
 void MakeSquare(float width, float height) // WIP
 {
