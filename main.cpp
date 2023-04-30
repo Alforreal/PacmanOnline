@@ -16,22 +16,73 @@ const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 bool movement = false;
 bool pmovement = false; // movement on a previous iteration, not yet implemented
 const float PacmanSize = 0.05f;
+const float PacmanSpeed = 0.015f;
+float PacmanPos[] = {        
+    PacmanSize, PacmanSize, 0.0f,
+    PacmanSize, -PacmanSize, 0.0f,
+    -PacmanSize, PacmanSize, 0.0f,
+
+    -PacmanSize, PacmanSize, 0.0f,
+    -PacmanSize, -PacmanSize, 0.0f,
+    PacmanSize, -PacmanSize, 0.0f
+};
 const float WallWidth = 0.05f;
 const float WallHeight = 0.02f;
-const float PacmanSpeed = 0.015f;
-float HorizontalSquare [(int) (2/WallWidth*2*2)];
+float HorizontalWallPos[] = {
+    WallWidth, WallHeight, 0.0f,
+    WallWidth, -WallHeight, 0.0f,
+    -WallWidth, WallHeight, 0.0f,
+
+    -WallWidth, WallHeight, 0.0f,
+    -WallWidth, -WallHeight, 0.0f,
+    WallWidth, -WallHeight, 0.0f
+};
+float VerticalWallPos[] = {
+    WallHeight, WallWidth, 0.0f,
+    WallHeight, -WallWidth, 0.0f,
+    -WallHeight, WallWidth, 0.0f,
+
+    -WallHeight, WallWidth, 0.0f,
+    -WallHeight, -WallWidth, 0.0f,
+    WallHeight, -WallWidth, 0.0f
+};
+float HorizontalSquare [(int) (2/WallWidth*2*2)]; // for 
 float VerticalSquare [(int) (2/WallWidth*2*2)];
 float HorizontalWallCoords[sizeof(HorizontalSquare)/sizeof(float)];
 float VerticalWallCoords[sizeof(VerticalSquare)/sizeof(float)];
-glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-glm::mat4 PacmanView = glm::mat4(1.0f);
-int collision;
-void MakeSquare(float width, float height);
+glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f); // Color of the Pacman
+glm::mat4 PacmanView = glm::mat4(1.0f); // Pacman View matrix
 int timeout = 0; // used for a timeout for collision, not yet implemented
+void MakeSquare(float width, float height);
 void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
 {
+    // initializing glfw:
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    // Menu screen:
+    GLFWwindow* menu = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Menu screen", NULL, NULL);
+    if(menu == NULL) // error checking with glfw
+    {
+        std::cout << "Error: GLFW window creation failed <type: menu>\n";
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(menu);
+
+    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Error: GLAD initiation failed <window type: menu>\n";
+        glfwTerminate();
+        return -1;
+    }
+    glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    // Configuring main game:
     MakeSquare(WallWidth, WallWidth);
     for(int i = 0, n = sizeof(HorizontalSquare)/sizeof(float); i < n; i++)
     {
@@ -41,15 +92,11 @@ int main()
     {
         VerticalWallCoords[i] = VerticalSquare[i];
     }
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "test", NULL, NULL);
     if(window == NULL)
     {
-        std::cout << "Error: GLFW window creation failed\n";
+        std::cout << "Error: GLFW window creation failed <type: main window>\n";
         glfwTerminate();
         return -1;
     }
@@ -57,32 +104,19 @@ int main()
     // glad initiation:
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Error: GLAD initiation failed\n";
+        std::cout << "Error: GLAD initiation failed <window type: main>\n";
         glfwTerminate();
         return -1;
     }
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     Shader PacMan("Shaders/pacman.vs", "Shaders/pacman.fs");
-    float PacmanPos[] = {
-        // positions         
-        PacmanSize, PacmanSize, 0.0f,
-        PacmanSize, -PacmanSize, 0.0f,
-        -PacmanSize, PacmanSize, 0.0f,
-
-        -PacmanSize, PacmanSize, 0.0f,
-        -PacmanSize, -PacmanSize, 0.0f,
-        PacmanSize, -PacmanSize, 0.0f
-    };
-
     unsigned int PacmanVBO, PacmanVAO;
     glGenVertexArrays(1, &PacmanVAO);
     glGenBuffers(1, &PacmanVBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(PacmanVAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, PacmanVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(PacmanPos), PacmanPos, GL_DYNAMIC_DRAW);
-
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -96,47 +130,26 @@ int main()
     glm::mat4 PacmanProjection;
     PacmanProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
     
-    
-    Shader HorizontalWall("Shaders/HorizontalWall.vs", "Shaders/HorizontalWall.fs");
-    float HorizontalWallPos[] = {
-        WallWidth, WallHeight, 0.0f,
-        WallWidth, -WallHeight, 0.0f,
-        -WallWidth, WallHeight, 0.0f,
-
-        -WallWidth, WallHeight, 0.0f,
-        -WallWidth, -WallHeight, 0.0f,
-        WallWidth, -WallHeight, 0.0f
-    };
+    // Horizontal Wall config:
+    Shader HorizontalWall("Shaders/HorizontalWall.vs", "Shaders/HorizontalWall.fs");    
     unsigned int HorizontalWallVBO, HorizontalWallVAO;
     glGenVertexArrays(1, &HorizontalWallVAO);
     glGenBuffers(1, &HorizontalWallVBO);
-
     glBindVertexArray(HorizontalWallVAO);
     glBindBuffer(GL_ARRAY_BUFFER, HorizontalWallVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(HorizontalWallPos), HorizontalWallPos, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // mathematics for the wall
-
     glm::mat4 HorizontalWallModel = glm::mat4(1.0f);
     HorizontalWallModel = glm::translate(HorizontalWallModel, glm::vec3(0.0f, 0.0f, -2.0f));
     glm::mat4 HorizontalWallView = glm::mat4(1.0f);
     glm::mat4 HorizontalWallProjection;
     HorizontalWallProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 
-    //vertical wall:
+    // Vertical Wall config:
     Shader VerticalWall("Shaders/VerticalWall.vs", "Shaders/VerticalWall.fs");
-    float VerticalWallPos[] = {
-        WallHeight, WallWidth, 0.0f,
-        WallHeight, -WallWidth, 0.0f,
-        -WallHeight, WallWidth, 0.0f,
-
-        -WallHeight, WallWidth, 0.0f,
-        -WallHeight, -WallWidth, 0.0f,
-        WallHeight, -WallWidth, 0.0f
-    };
     unsigned int VerticalWallVBO, VerticalWallVAO;
     glGenVertexArrays(1, &VerticalWallVAO);
     glGenBuffers(1, &VerticalWallVBO);
@@ -146,7 +159,7 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // mathematics for the wall:
+    // mathematics for the vertical wall:
     glm::mat4 VerticalWallModel = glm::mat4(1.0f);
     VerticalWallModel = glm::translate(VerticalWallModel, glm::vec3(0.0f, 0.0f, -2.0f));
     glm::mat4 VerticalWallView = glm::mat4(1.0f);
@@ -165,7 +178,6 @@ int main()
         // ------
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
         // render the triangle
         PacMan.use();
         glBindVertexArray(PacmanVAO);
@@ -242,6 +254,7 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
+int collision;
 void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
