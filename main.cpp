@@ -13,19 +13,31 @@
 // #include <unistd.h> // used for usleep()
 
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
-bool movement = false;
+// bool movement = false; replaced by the Sprite class;
 bool pmovement = false; // movement on a previous iteration, not yet implemented
-const float PacmanSize = 0.05f;
-const float PacmanSpeed = 0.015f;
-float PacmanPos[] = {        
-    PacmanSize, PacmanSize, 0.0f,
-    PacmanSize, -PacmanSize, 0.0f,
-    -PacmanSize, PacmanSize, 0.0f,
+class Sprite // used for the Pacman and the ghosts(hopefully)
+{
+    public:
+        float size;
+        float speed;
+        bool movement;
+        float pos[18] = { // used for the structure of the sprite for opengl(in the form of triangles)
+            size, size, 0.0f,
+            size, -size, 0.0f,
+            -size, size, 0.0f,
 
-    -PacmanSize, PacmanSize, 0.0f,
-    -PacmanSize, -PacmanSize, 0.0f,
-    PacmanSize, -PacmanSize, 0.0f
+            -size, size, 0.0f,
+            -size, -size, 0.0f,
+            size, -size, 0.0f
+        };
+        glm::mat4 view = glm::mat4(1.0f); // view matrix for manipulating the movement
+        glm::mat4 PacmanModel = glm::mat4(1.0f);
+        
 };
+Sprite Pacman;
+// const float PacmanSize = 0.05f; // replaced by the Sprite class;
+// const float PacmanSpeed = 0.015f; // replaced by the Sprite class;
+// Wall config:
 const float WallWidth = 0.05f;
 const float WallHeight = 0.02f;
 float HorizontalWallPos[] = {
@@ -46,18 +58,39 @@ float VerticalWallPos[] = {
     -WallHeight, -WallWidth, 0.0f,
     WallHeight, -WallWidth, 0.0f
 };
-float HorizontalSquare [(int) (2/WallWidth*2*2)]; // for 
+float HorizontalSquare [(int) (2/WallWidth*2*2)];
 float VerticalSquare [(int) (2/WallWidth*2*2)];
 float HorizontalWallCoords[sizeof(HorizontalSquare)/sizeof(float)];
 float VerticalWallCoords[sizeof(VerticalSquare)/sizeof(float)];
+
+// Button class(WIP):
+struct Button {
+    float height;
+    float width;
+    bool isPressed;
+};
 glm::vec4 InputColor = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f); // Color of the Pacman
-glm::mat4 PacmanView = glm::mat4(1.0f); // Pacman View matrix
+// glm::mat4 PacmanView = glm::mat4(1.0f); // Pacman View matrix
 int timeout = 0; // used for a timeout for collision, not yet implemented
+
 void MakeSquare(float width, float height);
 void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
 {
+    // Filling the classes with information:
+    Pacman.size = 0.05f;
+    Pacman.speed = 0.015f;
+    float PacmanPos[] = {        
+        Pacman.size, Pacman.size, 0.0f,
+        Pacman.size, -Pacman.size, 0.0f,
+        -Pacman.size, Pacman.size, 0.0f,
+
+        -Pacman.size, Pacman.size, 0.0f,
+        -Pacman.size, -Pacman.size, 0.0f,
+        Pacman.size, -Pacman.size, 0.0f
+    };
+    
     // initializing glfw:
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -92,7 +125,6 @@ int main()
     {
         VerticalWallCoords[i] = VerticalSquare[i];
     }
-
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "test", NULL, NULL);
     if(window == NULL)
     {
@@ -122,10 +154,8 @@ int main()
     glEnableVertexAttribArray(0);
 
     // mathematics:
-        // model matrix
-    glm::mat4 PacmanModel = glm::mat4(1.0f);
         // view matrix
-    PacmanView = translate(PacmanView, glm::vec3(0.0f, 0.0f, -2.0f));
+    Pacman.view = translate(Pacman.view, glm::vec3(0.0f, 0.0f, -2.0f));
         // projection matrix
     glm::mat4 PacmanProjection;
     PacmanProjection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
@@ -172,7 +202,7 @@ int main()
     {
         // input
         // -----
-        movement = true;
+        Pacman.movement = true;
         processInput(window);
         // render
         // ------
