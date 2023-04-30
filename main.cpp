@@ -13,7 +13,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Headers/Collision.h"
-
 // #include <unistd.h> // used for usleep()
 
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
@@ -46,7 +45,6 @@ class Wall
         glm::mat4 view = glm::mat4(1.0f); // view matrix
         glm::mat4 model = glm::mat4(1.0f); // model matrix
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
-
 };
 Wall Wall;
 // float HorizontalSquare [(int) (2/WallWidth*2*2)];
@@ -78,8 +76,6 @@ int main()
     Pacman.pos[15] =  Pacman.size; Pacman.pos[16] = -Pacman.size; Pacman.pos[17] = 0.0f;
         // Walls:
     Wall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-
-    // loading levels:
 
     // initializing glfw:
     glfwInit();
@@ -136,10 +132,9 @@ int main()
     glEnableVertexAttribArray(0);
 
     // mathematics:
-        // view matrix
     Pacman.view = translate(Pacman.view, glm::vec3(0.0f, 0.0f, -2.0f));
     
-    // Horizontal Wall config:
+    // Wall config:
     Shader WallShader("Shaders/Wall.vs", "Shaders/Wall.fs");    
     glGenVertexArrays(1, &Wall.VAO);
     glGenBuffers(1, &Wall.VBO);
@@ -151,40 +146,34 @@ int main()
     Wall.model = glm::translate(Wall.model, glm::vec3(0.0f, 0.0f, -2.0f));
 
     // render loop
-    // -----------
     while (!glfwWindowShouldClose(window))
     {
         // input
-        // -----
         Pacman.movement = true;
         processInput(window);
         // render
-        // ------
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         // render the triangle
         PacmanShader.use();
         glBindVertexArray(Pacman.VAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
         // uniform values for pacman
-        // -------------------------
         unsigned int PacmanModelLoc = glGetUniformLocation(PacmanShader.ID, "Pmodel");
         glUniformMatrix4fv(PacmanModelLoc, 1, GL_FALSE, glm::value_ptr(Pacman.model));
-
         unsigned int PacmanviewLoc = glGetUniformLocation(PacmanShader.ID, "Pview");
         glUniformMatrix4fv(PacmanviewLoc, 1, GL_FALSE, glm::value_ptr(Pacman.view));
-        
         unsigned int PacmanColorLoc = glGetUniformLocation(PacmanShader.ID, "InputColor");
         glUniform4fv(PacmanColorLoc, 1, glm::value_ptr(Pacman.color));
-        
         unsigned int PacmanProjectionLoc = glGetUniformLocation(PacmanShader.ID, "Pprojection");
         glUniformMatrix4fv(PacmanProjectionLoc, 1, GL_FALSE, glm::value_ptr(Pacman.projection));
+        // uniform values for the walls:
         unsigned int WallModelLoc = glGetUniformLocation(WallShader.ID, "Wmodel");
         unsigned int WallViewLoc = glGetUniformLocation(WallShader.ID, "Wview");
         unsigned int WallProjectionLoc = glGetUniformLocation(WallShader.ID, "Wprojection");
         unsigned int WallColorLoc = glGetUniformLocation(WallShader.ID, "WColor");
         glBindVertexArray(Wall.VAO);
+        // loading data from the .lvl file:
         std::ifstream level;
         level.open("Maps/TestPlayground.lvl");
         if(level)
