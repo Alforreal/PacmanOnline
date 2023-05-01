@@ -20,6 +20,7 @@
 const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 std::string map;
 // bool pmovement = false; // movement on a previous iteration, not yet implemented
+bool NewMap = false;
 sprite Pacman;
 wall Wall;
 button OriginalMapButton;
@@ -33,8 +34,8 @@ int main()
 {
     // Filling the classes with information:
         // Pacman:
-    Pacman.size = 0.03f;
-    Pacman.speed = 0.01f;
+    Pacman.size = 0.05f;
+    Pacman.speed = 0.015f;
     Pacman.color = glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
     Pacman.findpos();
         // Walls:
@@ -119,7 +120,7 @@ int main()
         glUniform4fv(ButtonColorLoc, 1, glm::value_ptr(OriginalMapButton.color));
         glUniformMatrix4fv(ButtonProjectionLoc, 1, GL_FALSE, glm::value_ptr(OriginalMapButton.projection));
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        
+
         TestMapButtonShader.use();
         ButtonModelLoc = glGetUniformLocation(TestMapButtonShader.ID, "Bmodel");
         ButtonViewLoc = glGetUniformLocation(TestMapButtonShader.ID, "Bview");
@@ -145,6 +146,29 @@ int main()
             glfwDestroyWindow(menu);
             break;
         }
+        if(NewMap)
+        {
+            glfwDestroyWindow(menu);
+            break;
+        }
+    }
+    if(NewMap)
+    {
+        GLFWwindow* MapCreator = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Map creator", NULL, NULL);
+        if(MapCreator == NULL)
+        {
+            std::cout << "Error: GLFW window creation failed <type: Map Creator>\n";
+            glfwTerminate();
+            return -1;
+        }
+        glfwMakeContextCurrent(MapCreator);
+        if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+        {
+            std::cout << "Error: GLAD initiation failed <window type: Map Creator>\n";
+            glfwTerminate();
+            return -1;
+        }
+        glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     }
     // Configuring the main game:
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "test", NULL, NULL);
@@ -401,6 +425,10 @@ void processMenuInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    else if(glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+    {
+        NewMap = true;
+    }
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
     // LogMovement(mx, my);
