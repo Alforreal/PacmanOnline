@@ -1,6 +1,4 @@
 #include "Headers/Shader.h"
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 #include <stdlib.h>
 // #include <glm/ext/matrix_clip_space.hpp> // previously didn't work without them, now it does, idk why
 // #include <glm/ext/matrix_transform.hpp> //required for matrix transformation, or at least I thought so, code works without them
@@ -23,13 +21,14 @@ std::string map;
 bool NewMap = false;
 sprite Pacman;
 wall Wall;
+wall MapWall;
 button OriginalMapButton;
 button TestButton;
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
-
 void LogMovement(float x, float y);
 void processGameInput(GLFWwindow *window);
 void processMenuInput(GLFWwindow *window);
+void processMakerInput(GLFWwindow *window);
 int main()
 {
     // Filling the classes with information:
@@ -40,6 +39,7 @@ int main()
     Pacman.findpos();
         // Walls:
     Wall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    MapWall.color = glm::vec4(0.0f, 0.f, 1.0f, 1.0f);
         // Buttons:
     OriginalMapButton.width = 0.5f;
     OriginalMapButton.height = 0.1f;
@@ -154,14 +154,14 @@ int main()
     }
     if(NewMap)
     {
-        GLFWwindow* MapCreator = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Map creator", NULL, NULL);
-        if(MapCreator == NULL)
+        GLFWwindow* mapcreator = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Map creator", NULL, NULL);
+        if(mapcreator == NULL)
         {
             std::cout << "Error: GLFW window creation failed <type: Map Creator>\n";
             glfwTerminate();
             return -1;
         }
-        glfwMakeContextCurrent(MapCreator);
+        glfwMakeContextCurrent(mapcreator);
         if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
             std::cout << "Error: GLAD initiation failed <window type: Map Creator>\n";
@@ -169,6 +169,52 @@ int main()
             return -1;
         }
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+        Shader MapWallShader("Shaders/MapWall.vs", "Shaders/MapWall.fs");
+        glGenVertexArrays(1, &MapWall.VAO);
+        glGenBuffers(1, &MapWall.VBO);
+        glBindVertexArray(MapWall.VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, MapWall.VBO);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // mathematics for the wall:
+        MapWall.model = glm::translate(MapWall.model, glm::vec3(0.0f, 0.0f, -2.0f));
+        MapWall.projection = projection;
+        while(!glfwWindowShouldClose(mapcreator))
+        {
+            processMakerInput(mapcreator);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            // render the triangle
+            MapWallShader.use();
+            glBindVertexArray(MapWall.VAO);
+            // uniform values for the buttons:
+            unsigned int MapWallModelLoc = glGetUniformLocation(MapWallShader.ID, "Wmodel");
+            unsigned int MapWallViewLoc = glGetUniformLocation(MapWallShader.ID, "Wview");
+            unsigned int MapWallColorLoc = glGetUniformLocation(MapWallShader.ID, "WColor");
+            unsigned int MapWallProjectionLoc = glGetUniformLocation(MapWallShader.ID, "Wprojection");
+            if(MapWall.index == 0) {}
+            else
+            {
+                for(int i = 0; i < MapWall.index; i++)
+                {
+                    MapWall.pos[0]  =  MapWall.width[i]; MapWall.pos[1]  =  MapWall.height[i]; MapWall.pos[2]  = 0.0f;
+                    MapWall.pos[3]  =  MapWall.width[i]; MapWall.pos[4]  = -MapWall.height[i]; MapWall.pos[5]  = 0.0f;
+                    MapWall.pos[6]  = -MapWall.width[i]; MapWall.pos[7]  =  MapWall.height[i]; MapWall.pos[8]  = 0.0f;
+                    MapWall.pos[9]  = -MapWall.width[i]; MapWall.pos[10] =  MapWall.height[i]; MapWall.pos[11] = 0.0f;
+                    MapWall.pos[12] = -MapWall.width[i]; MapWall.pos[13] = -MapWall.height[i]; MapWall.pos[14] = 0.0f;
+                    MapWall.pos[15] =  MapWall.width[i]; MapWall.pos[16] = -MapWall.height[i]; MapWall.pos[17] = 0.0f;
+                    MapWall.view = translate(MapWall.view, glm::vec3(MapWall.x[i], MapWall.y[i], 0.0f));
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_STATIC_DRAW);
+                    glUniformMatrix4fv(MapWallModelLoc, 1, GL_FALSE, glm::value_ptr(MapWall.model));
+                    glUniformMatrix4fv(MapWallViewLoc, 1, GL_FALSE, glm::value_ptr(MapWall.view));
+                    glUniform4fv(MapWallColorLoc, 1, glm::value_ptr(MapWall.color));
+                    glUniformMatrix4fv(MapWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(MapWall.projection));
+                    glDrawArrays(GL_TRIANGLES, 0, 6);
+                }
+            }
+            glfwSwapBuffers(mapcreator);
+            glfwPollEvents();
+        }
     }
     // Configuring the main game:
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "test", NULL, NULL);
@@ -246,12 +292,12 @@ int main()
         level.open(map.c_str());
         if(level)
         {       
-            int i = 0, j = 0;
+            int j = 0;
             for(std::string line; std::getline(level, line);)   //read stream line by line
             {
                 std::istringstream in(line);
                 std::string type;
-                in >> Wall.coords[i] >> Wall.coords[i+1] >> Wall.width[j] >> Wall.height[j];
+                in >> Wall.x[j] >> Wall.y[j] >> Wall.width[j] >> Wall.height[j];
                 Wall.pos[0]  =  Wall.width[j]; Wall.pos[1]  =  Wall.height[j]; Wall.pos[2]  = 0.0f;
                 Wall.pos[3]  =  Wall.width[j]; Wall.pos[4]  = -Wall.height[j]; Wall.pos[5]  = 0.0f;
                 Wall.pos[6]  = -Wall.width[j]; Wall.pos[7]  =  Wall.height[j]; Wall.pos[8]  = 0.0f;
@@ -259,7 +305,7 @@ int main()
                 Wall.pos[12] = -Wall.width[j]; Wall.pos[13] = -Wall.height[j]; Wall.pos[14] = 0.0f;
                 Wall.pos[15] =  Wall.width[j]; Wall.pos[16] = -Wall.height[j]; Wall.pos[17] = 0.0f;
                 glBufferData(GL_ARRAY_BUFFER, sizeof(Wall.pos), Wall.pos, GL_STATIC_DRAW);
-                Wall.model = glm::translate(Wall.model, glm::vec3(Wall.coords[i], Wall.coords[i+1], -2.0f));
+                Wall.model = glm::translate(Wall.model, glm::vec3(Wall.x[j], Wall.y[j], -2.0f));
                 WallShader.use();
                 glUniformMatrix4fv(WallModelLoc, 1, GL_FALSE, glm::value_ptr(Wall.model));
                 glUniformMatrix4fv(WallViewLoc, 1, GL_FALSE, glm::value_ptr(Wall.view));
@@ -267,7 +313,6 @@ int main()
                 glUniform4fv(WallColorLoc, 1, glm::value_ptr(Wall.color));
                 glDrawArrays(GL_TRIANGLES, 0, 6);
                 Wall.model = glm::mat4(1.0f);
-                i+= 2;
                 j++;
             }
             level.close();
@@ -307,9 +352,9 @@ void processGameInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
     else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-        for(int i = 0, n = sizeof(Wall.coords)/sizeof(float), j = 0; i < n; i+= 2, j++)
+        for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = RCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.coords[i], Wall.coords[i+1], Wall.width[j], Wall.height[j]);
+            collision = RCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
                 Pacman.movement = false;
@@ -334,9 +379,9 @@ void processGameInput(GLFWwindow *window)
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         // PacmanMovement(0, 1, 'u');
-        for(int i = 0, n = sizeof(Wall.coords)/sizeof(float), j = 0; i < n; i+=2, j++)
+        for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = TCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.coords[i], Wall.coords[i+1], Wall.width[j], Wall.height[j]);
+            collision = TCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
                 Pacman.view = translate(Pacman.view, glm::vec3(0.0f, -Pacman.speed, 0.0f));
@@ -360,9 +405,9 @@ void processGameInput(GLFWwindow *window)
     }
     else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-        for(int i = 0, n = sizeof(Wall.coords)/sizeof(float), j = 0; i < n; i+=2, j++)
+        for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = LCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.coords[i], Wall.coords[i+1], Wall.width[j], Wall.height[j]);
+            collision = LCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
                 Pacman.view = glm::translate(Pacman.view, glm::vec3(Pacman.speed, 0.0f, 0.0f));
@@ -387,9 +432,9 @@ void processGameInput(GLFWwindow *window)
     }
     else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        for(int i = 0, n = sizeof(Wall.coords)/sizeof(float), j = 0; i < n; i+=2, j++)
+        for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = BCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.coords[i], Wall.coords[i+1], Wall.width[j], Wall.height[j]);
+            collision = BCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
                 Pacman.view = glm::translate(Pacman.view, glm::vec3(0.0f, Pacman.speed, 0.0f));
@@ -436,5 +481,47 @@ void processMenuInput(GLFWwindow *window)
     {
         OriginalMapButton.isPressed = MouseDetection((float)mx/((float)WINDOW_WIDTH/2)-1.0f, (float)my/((float)WINDOW_HEIGHT/2)-1.0f, OriginalMapButton.coords[0], OriginalMapButton.coords[1], OriginalMapButton.width, OriginalMapButton.height);
         TestButton.isPressed = MouseDetection((float)mx/((float)WINDOW_WIDTH/2)-1.0f, (float)my/((float)WINDOW_HEIGHT/2)-1.0f, TestButton.coords[0], TestButton.coords[1], TestButton.width, TestButton.height);
+    }
+}
+void processMakerInput(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    double mx, my;
+    glfwGetCursorPos(window, &mx, &my);
+    // LogMovement(mx, my);
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
+    {
+        if(!MapWall.MousePressed)
+        {
+            MapWall.MousePressed = true;
+            MapWall.StartingX = mx;
+            MapWall.StartingY = my;
+        }
+    }
+    else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
+    {
+        MapWall.MousePressed = false;
+        if(MapWall.StartingX >= mx)
+        {
+            MapWall.width[MapWall.index] = ((MapWall.StartingX-mx)/2)/(WINDOW_WIDTH/2);
+        }
+        else
+        {
+            MapWall.width[MapWall.index] = ((mx-MapWall.StartingX)/2)/(WINDOW_WIDTH/2);
+        }
+
+        if(MapWall.StartingY >= my)
+        {
+            MapWall.height[MapWall.index] = ((MapWall.StartingY-my)/2)/(WINDOW_HEIGHT/2);
+        }
+        else
+        {
+            MapWall.height[MapWall.index] = ((MapWall.StartingY-my)/2)/(WINDOW_HEIGHT/2);
+        }
+
+        MapWall.x[MapWall.index] = ((MapWall.StartingX+mx)/2)/(WINDOW_WIDTH/2) - 1.0f;
+        MapWall.y[MapWall.index] = ((MapWall.StartingY+my)/2)/(WINDOW_HEIGHT/2) - 1.0f;
+        MapWall.index ++;
     }
 }

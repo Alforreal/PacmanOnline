@@ -29,12 +29,18 @@ class wall
         float height[128];
         float pos[18];
         glm::vec4 color; // Color of the walls
-        float coords[256];
+        float x[128];
+        float y[128];
         unsigned int VBO;
         unsigned int VAO;
         glm::mat4 view = glm::mat4(1.0f); // view matrix
         glm::mat4 model = glm::mat4(1.0f); // model matrix
         glm::mat4 projection;
+        // Stuff for the wall creator:
+        int index = 0;
+        float StartingX;
+        float StartingY;
+        bool MousePressed = false;
 };
 class button {
     public:
