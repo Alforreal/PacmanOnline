@@ -1,5 +1,5 @@
 #include "Headers/Shader.h"
-#include <glm/ext/matrix_clip_space.hpp>
+// #include <glm/ext/matrix_clip_space.hpp>
 #include <stdlib.h>
 // #include <glm/ext/matrix_clip_space.hpp> // previously didn't work without them, now it does, idk why
 // #include <glm/ext/matrix_transform.hpp> //required for matrix transformation, or at least I thought so, code works without them
@@ -32,13 +32,13 @@ class Sprite // used for the Pacman and the ghosts(hopefully)
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f); // projection matrix for the perspective
 };
 Sprite Pacman;
-class Wall
+class wall
 {
     public:
         float width[128];
         float height[128];
         float pos[18];
-        glm::vec4 color; // Color of the Walls
+        glm::vec4 color; // Color of the walls
         float coords[256];
         unsigned int VBO;
         unsigned int VAO;
@@ -46,9 +46,7 @@ class Wall
         glm::mat4 model = glm::mat4(1.0f); // model matrix
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 };
-Wall Wall;
-// float HorizontalSquare [(int) (2/WallWidth*2*2)];
-// float VerticalSquare [(int) (2/WallWidth*2*2)];
+wall Wall;
 
 // Button class(WIP):
 struct Button {
@@ -58,7 +56,6 @@ struct Button {
 };
 int timeout = 0; // used for a timeout for collision, not yet implemented
 
-void MakeSquare(float width, float height);
 void LogMovement(float x, float y);
 void processInput(GLFWwindow *window);
 int main()
@@ -175,7 +172,7 @@ int main()
         glBindVertexArray(Wall.VAO);
         // loading data from the .lvl file:
         std::ifstream level;
-        level.open("Maps/TestPlayground.lvl");
+        level.open("Maps/Square.lvl");
         if(level)
         {       
             int i = 0, j = 0;
@@ -353,26 +350,3 @@ void LogMovement(float x, float y)
     system("clear");
     std::cout << "Position(x, y): " << x << ", " << y << "\n";
 }
-// void MakeSquare(float width, float height) // WIP
-// {
-//     for(int i = 0, n = 2/width*2; i < n; i+=2)
-//     {
-//         HorizontalSquare[i] = -1.0f+i*width;
-//         HorizontalSquare[i+1] = 0.8f;
-//     }
-//     for(int i = 2/width*2, n = 2/width*2*2; i < n; i+=2)
-//     {
-//         HorizontalSquare[i] = -1.0f+i*width;
-//         HorizontalSquare[i+1] = -0.8f;
-//     }
-//     for(int i = 0, n = 2/height*2; i < n; i+=2)
-//     {
-//         VerticalSquare[i] = 0.8f;
-//         VerticalSquare[i+1] = -1.0f+i*height;
-//     }
-//     for(int i = 2/height*2, n = 2/height*2*2; i < n; i+=2)
-//     {
-//         VerticalSquare[i] = -0.8f;
-//         VerticalSquare[i+1] = -1.0f+i*height;
-//     }
-// }
