@@ -15,8 +15,9 @@
 #include "Headers/Classes.h"
 // #include <unistd.h> // used for usleep()
 
-const int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
+int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 std::string map = "Maps/Square.lvl";
+int timeout = 0;
 // bool pmovement = false; // movement on a previous iteration, not yet implemented
 bool NewMap = false;
 sprite Pacman;
@@ -39,7 +40,7 @@ int main()
     Pacman.findpos();
         // Walls:
     Wall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    MapWall.color = glm::vec4(0.0f, 0.f, 1.0f, 1.0f);
+    MapWall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
         // Buttons:
     OriginalMapButton.width = 0.5f;
     OriginalMapButton.height = 0.1f;
@@ -154,6 +155,8 @@ int main()
     }
     if(NewMap)
     {
+        WINDOW_WIDTH = 1000;
+        WINDOW_HEIGHT = 1000;
         GLFWwindow* mapcreator = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Map creator", NULL, NULL);
         if(mapcreator == NULL)
         {
@@ -177,11 +180,14 @@ int main()
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
         // mathematics for the wall:
-        MapWall.model = glm::translate(MapWall.model, glm::vec3(0.0f, 0.0f, -2.0f));
         MapWall.projection = projection;
         while(!glfwWindowShouldClose(mapcreator))
         {
             processMakerInput(mapcreator);
+            if(timeout > 0)
+            {
+                timeout--;
+            }
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             // uniform values:
@@ -200,15 +206,16 @@ int main()
                     MapWall.pos[9]  = -MapWall.width[i]; MapWall.pos[10] =  MapWall.height[i]; MapWall.pos[11] = 0.0f;
                     MapWall.pos[12] = -MapWall.width[i]; MapWall.pos[13] = -MapWall.height[i]; MapWall.pos[14] = 0.0f;
                     MapWall.pos[15] =  MapWall.width[i]; MapWall.pos[16] = -MapWall.height[i]; MapWall.pos[17] = 0.0f;
-                    MapWall.view = translate(MapWall.view, glm::vec3(MapWall.x[i], MapWall.y[i], 0.0f));
+                    // MapWall.view = translate(MapWall.view, glm::vec3(MapWall.x[i], MapWall.y[i], 0.0f));
+                    MapWall.model = glm::translate(MapWall.model, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
                     MapWallShader.use();
                     glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_DYNAMIC_DRAW);
                     glUniformMatrix4fv(MapWallModelLoc, 1, GL_FALSE, glm::value_ptr(MapWall.model));
                     glUniformMatrix4fv(MapWallViewLoc, 1, GL_FALSE, glm::value_ptr(MapWall.view));
                     glUniform4fv(MapWallColorLoc, 1, glm::value_ptr(MapWall.color));
                     glUniformMatrix4fv(MapWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(MapWall.projection));
+                    MapWall.model = glm::mat4(1.0f);
                     glDrawArrays(GL_TRIANGLES, 0, 6);
-                    std::cout << i << "\n";
                 }
             }
             glfwSwapBuffers(mapcreator);
@@ -216,6 +223,8 @@ int main()
         }
     }
     // Configuring the main game:
+    WINDOW_HEIGHT = 600;
+    WINDOW_WIDTH = 600;
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "test", NULL, NULL);
     if(window == NULL)
     {
@@ -324,7 +333,6 @@ int main()
         }
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -475,7 +483,6 @@ void processMenuInput(GLFWwindow *window)
     }
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
-    // LogMovement(mx, my);
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
     {
         OriginalMapButton.isPressed = MouseDetection((float)mx/((float)WINDOW_WIDTH/2)-1.0f, (float)my/((float)WINDOW_HEIGHT/2)-1.0f, OriginalMapButton.coords[0], OriginalMapButton.coords[1], OriginalMapButton.width, OriginalMapButton.height);
@@ -486,6 +493,18 @@ void processMakerInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    else if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            MapWall.index --;
+            timeout = 25;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
     // LogMovement(mx, my);
@@ -496,7 +515,6 @@ void processMakerInput(GLFWwindow *window)
             MapWall.MousePressed = true;
             MapWall.StartingX = mx;
             MapWall.StartingY = my;
-    
         }
     }
     else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
@@ -504,26 +522,16 @@ void processMakerInput(GLFWwindow *window)
         if(MapWall.MousePressed)
         {
             MapWall.MousePressed = false;
-            if(MapWall.StartingX >= mx)
-            {
-                MapWall.width[MapWall.index] = (((float)MapWall.StartingX-(float)mx)/2)/((float)WINDOW_WIDTH/2);
-            }
-            else
-            {
-                MapWall.width[MapWall.index] = (((float)mx-(float)MapWall.StartingX)/2)/((float)WINDOW_WIDTH/2);
-            }
-
-            if(MapWall.StartingY >= my)
-            {
-                MapWall.height[MapWall.index] = (((float)MapWall.StartingY-(float)my)/2)/((float)WINDOW_HEIGHT/2);
-            }
-            else
-            {
-                MapWall.height[MapWall.index] = (((float)MapWall.StartingY-(float)my)/2)/((float)WINDOW_HEIGHT/2);
-            }
-
-            MapWall.x[MapWall.index] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
-            MapWall.y[MapWall.index] = (((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f;
+            MapWall.width[MapWall.index] = abs((((float)MapWall.StartingX-(float)mx)/2)/((float)WINDOW_WIDTH/2));
+            MapWall.height[MapWall.index] = abs((((float)MapWall.StartingY-(float)my)/2)/((float)WINDOW_HEIGHT/2));
+            
+            // MapWall.x[MapWall.index] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
+            // MapWall.y[MapWall.index] = (((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f;
+            
+            // MapWall.x[MapWall.index] = ((float)(abs(MapWall.StartingX-mx))/2 + (float)MapWall.StartingX)/((float)WINDOW_HEIGHT/2) -1.0f;
+            // MapWall.y[MapWall.index] = ((float)(abs(MapWall.StartingY-my))/2 + (float)MapWall.StartingY)/((float)WINDOW_HEIGHT/2) -1.0f;
+            
+            
             MapWall.index ++;
         }
     }
