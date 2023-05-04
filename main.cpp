@@ -531,6 +531,9 @@ void processMakerInput(GLFWwindow *window)
             // MapWall.x[MapWall.index] = ((float)(abs(MapWall.StartingX-mx))/2 + (float)MapWall.StartingX)/((float)WINDOW_HEIGHT/2) -1.0f;
             // MapWall.y[MapWall.index] = ((float)(abs(MapWall.StartingY-my))/2 + (float)MapWall.StartingY)/((float)WINDOW_HEIGHT/2) -1.0f;
             
+            // MapWall.x[MapWall.index] = abs(MapWall.width[MapWall.index]) + (float)mx/((float)WINDOW_WIDTH/2) - 1.0f;
+            // MapWall.y[MapWall.index] = abs(MapWall.height[MapWall.index]) + (float)my/((float)WINDOW_HEIGHT/2) - 1.0f;
+
             
             MapWall.index ++;
         }
