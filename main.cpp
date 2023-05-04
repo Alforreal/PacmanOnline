@@ -16,8 +16,9 @@
 // #include <unistd.h> // used for usleep()
 
 int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
-std::string map = "Maps/Square.lvl";
+std::string map = "Maps/New.lvl";
 int timeout = 0;
+int ZYcount = 0;
 // bool pmovement = false; // movement on a previous iteration, not yet implemented
 bool NewMap = false;
 sprite Pacman;
@@ -206,7 +207,6 @@ int main()
                     MapWall.pos[9]  = -MapWall.width[i]; MapWall.pos[10] =  MapWall.height[i]; MapWall.pos[11] = 0.0f;
                     MapWall.pos[12] = -MapWall.width[i]; MapWall.pos[13] = -MapWall.height[i]; MapWall.pos[14] = 0.0f;
                     MapWall.pos[15] =  MapWall.width[i]; MapWall.pos[16] = -MapWall.height[i]; MapWall.pos[17] = 0.0f;
-                    // MapWall.view = translate(MapWall.view, glm::vec3(MapWall.x[i], MapWall.y[i], 0.0f));
                     MapWall.model = glm::translate(MapWall.model, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
                     MapWallShader.use();
                     glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_DYNAMIC_DRAW);
@@ -217,6 +217,11 @@ int main()
                     MapWall.model = glm::mat4(1.0f);
                     glDrawArrays(GL_TRIANGLES, 0, 6);
                 }
+            }
+            if(glfwWindowShouldClose(mapcreator))
+            {
+                glfwDestroyWindow(mapcreator);
+                break;
             }
             glfwSwapBuffers(mapcreator);
             glfwPollEvents();
@@ -497,8 +502,55 @@ void processMakerInput(GLFWwindow *window)
     {
         if(timeout == 0)
         {
-            MapWall.index --;
+            if(ZYcount > 0)
+            {
+                MapWall.index --;
+                timeout = 25;
+                ZYcount ++;
+            }
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            if(ZYcount > 0)
+            {
+                MapWall.index++;
+                timeout = 25;
+                ZYcount --;
+            }
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
             timeout = 25;
+            std::ofstream output("Maps/New.lvl");
+            if(output)
+            {
+                for(int i = 0; i < MapWall.index; i++)
+                {
+                    output << MapWall.x[i] << " " << MapWall.y[i] << " " << MapWall.width[i] << " " << MapWall.height[i] << "\n";
+                }
+                std::cout << "Map Saved successfully\n";
+            }
+            else
+            {
+                std::cout << "Failed to create file for creation\n";
+                glfwTerminate();
+                output.close();
+            }
+            output.close();
         }
         else if(timeout > 0)
         {
@@ -522,19 +574,20 @@ void processMakerInput(GLFWwindow *window)
         if(MapWall.MousePressed)
         {
             MapWall.MousePressed = false;
+            
             MapWall.width[MapWall.index] = abs((((float)MapWall.StartingX-(float)mx)/2)/((float)WINDOW_WIDTH/2));
             MapWall.height[MapWall.index] = abs((((float)MapWall.StartingY-(float)my)/2)/((float)WINDOW_HEIGHT/2));
             
-            // MapWall.x[MapWall.index] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
-            // MapWall.y[MapWall.index] = (((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f;
-            
+            MapWall.x[MapWall.index] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
+            MapWall.y[MapWall.index] = -((((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f);
+
             // MapWall.x[MapWall.index] = ((float)(abs(MapWall.StartingX-mx))/2 + (float)MapWall.StartingX)/((float)WINDOW_HEIGHT/2) -1.0f;
             // MapWall.y[MapWall.index] = ((float)(abs(MapWall.StartingY-my))/2 + (float)MapWall.StartingY)/((float)WINDOW_HEIGHT/2) -1.0f;
             
             // MapWall.x[MapWall.index] = abs(MapWall.width[MapWall.index]) + (float)mx/((float)WINDOW_WIDTH/2) - 1.0f;
             // MapWall.y[MapWall.index] = abs(MapWall.height[MapWall.index]) + (float)my/((float)WINDOW_HEIGHT/2) - 1.0f;
 
-            
+            ZYcount ++;
             MapWall.index ++;
         }
     }
