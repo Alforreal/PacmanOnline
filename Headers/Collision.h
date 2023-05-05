@@ -16,7 +16,7 @@
 */
 // If there's no collision, the funciton will return 0 
 // This code should be improved for efficiency, for now it is what it is
-#include <endian.h>
+// #include <endian.h> // Don't know why this was added
 int RCollisionDetection(float x0, float y0, float width0, float height0, float x1, float y1, float width1, float height1) // Detects collision from the right
 {
     if(x0+width0 >= x1-width1)

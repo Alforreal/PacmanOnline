@@ -369,8 +369,8 @@ void processGameInput(GLFWwindow *window)
             collision = RCollisionDetection(Pacman.view[3][0]+Pacman.speed, Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
-                Pacman.movement = false;
                 // Pacman.view = translate(Pacman.view, glm::vec3(-Pacman.speed, 0.0f, 0.0f));
+                Pacman.movement = false;
                 Pacman.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
         }
@@ -390,7 +390,6 @@ void processGameInput(GLFWwindow *window)
     }
     else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        // PacmanMovement(0, 1, 'u');
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
             collision = TCollisionDetection(Pacman.view[3][0], Pacman.view[3][1]+Pacman.speed, Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
