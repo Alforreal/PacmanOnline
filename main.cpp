@@ -366,11 +366,11 @@ void processGameInput(GLFWwindow *window)
     {
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = RCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
+            collision = RCollisionDetection(Pacman.view[3][0]+Pacman.speed, Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
                 Pacman.movement = false;
-                Pacman.view = translate(Pacman.view, glm::vec3(-Pacman.speed, 0.0f, 0.0f));
+                // Pacman.view = translate(Pacman.view, glm::vec3(-Pacman.speed, 0.0f, 0.0f));
                 Pacman.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
         }
@@ -393,10 +393,10 @@ void processGameInput(GLFWwindow *window)
         // PacmanMovement(0, 1, 'u');
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = TCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
+            collision = TCollisionDetection(Pacman.view[3][0], Pacman.view[3][1]+Pacman.speed, Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
-                Pacman.view = translate(Pacman.view, glm::vec3(0.0f, -Pacman.speed, 0.0f));
+                // Pacman.view = translate(Pacman.view, glm::vec3(0.0f, -Pacman.speed, 0.0f));
                 Pacman.movement = false;
                 Pacman.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
@@ -419,10 +419,10 @@ void processGameInput(GLFWwindow *window)
     {
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = LCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
+            collision = LCollisionDetection(Pacman.view[3][0]-Pacman.speed, Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
-                Pacman.view = glm::translate(Pacman.view, glm::vec3(Pacman.speed, 0.0f, 0.0f));
+                // Pacman.view = glm::translate(Pacman.view, glm::vec3(Pacman.speed, 0.0f, 0.0f));
                 Pacman.movement = false;
                 Pacman.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
             }
@@ -446,12 +446,12 @@ void processGameInput(GLFWwindow *window)
     {
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
-            collision = BCollisionDetection(Pacman.view[3][0], Pacman.view[3][1], Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
+            collision = BCollisionDetection(Pacman.view[3][0], Pacman.view[3][1]-Pacman.speed, Pacman.size, Pacman.size, Wall.x[i], Wall.y[i], Wall.width[i], Wall.height[i]);
             if(collision != 0)
             {
-                Pacman.view = glm::translate(Pacman.view, glm::vec3(0.0f, Pacman.speed, 0.0f));
-                Pacman.movement = false;
+                // Pacman.view = glm::translate(Pacman.view, glm::vec3(0.0f, Pacman.speed, 0.0f));
                 Pacman.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+                Pacman.movement = false;
             }
         }
         if(Pacman.movement)
