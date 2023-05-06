@@ -558,7 +558,7 @@ void processMakerInput(GLFWwindow *window)
     }
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
-    // LogMovement(mx, my);
+    LogMovement(mx, my);
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
     {
         if(!MapWall.MousePressed)
@@ -574,8 +574,8 @@ void processMakerInput(GLFWwindow *window)
         {
             MapWall.MousePressed = false;
             
-            MapWall.width[MapWall.index] = abs((((float)MapWall.StartingX-(float)mx)/2)/((float)WINDOW_WIDTH/2));
-            MapWall.height[MapWall.index] = abs((((float)MapWall.StartingY-(float)my)/2)/((float)WINDOW_HEIGHT/2));
+            MapWall.width[MapWall.index] = abs((((float)MapWall.StartingX-(float)mx)/2))/((float)WINDOW_WIDTH/2);
+            MapWall.height[MapWall.index] = abs((((float)MapWall.StartingY-(float)my)/2))/((float)WINDOW_HEIGHT/2);
             
             MapWall.x[MapWall.index] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
             MapWall.y[MapWall.index] = -((((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f);

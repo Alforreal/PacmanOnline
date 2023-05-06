@@ -38,8 +38,8 @@ class wall
         glm::mat4 projection;
         // Stuff for the wall creator:
         int index = 0;
-        float StartingX;
-        float StartingY;
+        double StartingX;
+        double StartingY;
         bool MousePressed = false;
 };
 class button {
