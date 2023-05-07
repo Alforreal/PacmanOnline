@@ -156,8 +156,8 @@ int main()
     }
     if(NewMap)
     {
-        WINDOW_WIDTH = 1000;
-        WINDOW_HEIGHT = 1000;
+        WINDOW_WIDTH = 600;
+        WINDOW_HEIGHT = 600;
         GLFWwindow* mapcreator = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Map creator", NULL, NULL);
         if(mapcreator == NULL)
         {
