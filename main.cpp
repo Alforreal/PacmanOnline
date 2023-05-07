@@ -26,6 +26,7 @@ wall Wall;
 wall MapWall;
 button OriginalMapButton;
 button TestButton;
+button TempWall;
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
 void LogMovement(float x, float y);
 void processGameInput(GLFWwindow *window);
@@ -42,6 +43,7 @@ int main()
         // Walls:
     Wall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
     MapWall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    TempWall.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
         // Buttons:
     OriginalMapButton.width = 0.5f;
     OriginalMapButton.height = 0.1f;
@@ -103,6 +105,12 @@ int main()
     glEnableVertexAttribArray(0);
     TestButton.view = translate(TestButton.view, glm::vec3(TestButton.coords[0], TestButton.coords[1], -2.0f));
     TestButton.projection = projection;
+    
+    // Declaring uniform values:
+    unsigned int ButtonModelLoc;
+    unsigned int ButtonViewLoc;
+    unsigned int ButtonColorLoc;
+    unsigned int ButtonProjectionLoc;
 
     while(!glfwWindowShouldClose(menu))
     {
@@ -111,12 +119,12 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         // render the triangle
         OriginalMapButtonShader.use();
+        ButtonModelLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "Bmodel");
+        ButtonViewLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "Bview");
+        ButtonColorLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "BColor");
+        ButtonProjectionLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "Bprojection");
         glBindVertexArray(OriginalMapButton.VAO);
         // uniform values for the buttons:
-        unsigned int ButtonModelLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "Bmodel");
-        unsigned int ButtonViewLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "Bview");
-        unsigned int ButtonColorLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "BColor");
-        unsigned int ButtonProjectionLoc = glGetUniformLocation(OriginalMapButtonShader.ID, "Bprojection");
         glUniformMatrix4fv(ButtonModelLoc, 1, GL_FALSE, glm::value_ptr(OriginalMapButton.model));
         glUniformMatrix4fv(ButtonViewLoc, 1, GL_FALSE, glm::value_ptr(OriginalMapButton.view));
         glUniform4fv(ButtonColorLoc, 1, glm::value_ptr(OriginalMapButton.color));
@@ -173,7 +181,7 @@ int main()
             return -1;
         }
         glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        Shader MapWallShader("Shaders/MapWall.vs", "Shaders/MapWall.fs");
+        Shader MapWallShader("Shaders/MapWall/MapWall.vs", "Shaders/MapWall/MapWall.fs");
         glGenVertexArrays(1, &MapWall.VAO);
         glGenBuffers(1, &MapWall.VBO);
         glBindVertexArray(MapWall.VAO);
@@ -182,6 +190,26 @@ int main()
         glEnableVertexAttribArray(0);
         // mathematics for the wall:
         MapWall.projection = projection;
+        // TempWall:
+        Shader TempWallShader("Shaders/TempWall/TempWall.vs", "Shaders/TempWall/TempWall.fs");
+        glGenVertexArrays(1, &TempWall.VAO);
+        glGenBuffers(1, &TempWall.VBO);
+        glBindVertexArray(TempWall.VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, TempWall.VBO);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        TempWall.projection = projection;
+        // uniform values:
+        unsigned int MapWallModelLoc = glGetUniformLocation(MapWallShader.ID, "Wmodel");
+        unsigned int MapWallViewLoc = glGetUniformLocation(MapWallShader.ID, "Wview");
+        unsigned int MapWallColorLoc = glGetUniformLocation(MapWallShader.ID, "WColor");
+        unsigned int MapWallProjectionLoc = glGetUniformLocation(MapWallShader.ID, "Wprojection");
+
+        unsigned int TempWallModelLoc = glGetUniformLocation(TempWallShader.ID, "Bmodel");
+        unsigned int TempWallViewLoc = glGetUniformLocation(TempWallShader.ID, "Bview");
+        unsigned int TempWallColorLoc = glGetUniformLocation(TempWallShader.ID, "BColor");
+        unsigned int TempWallProjectionLoc = glGetUniformLocation(TempWallShader.ID, "Bprojection");
+
         while(!glfwWindowShouldClose(mapcreator))
         {
             processMakerInput(mapcreator);
@@ -191,11 +219,16 @@ int main()
             }
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
-            // uniform values:
-            unsigned int MapWallModelLoc = glGetUniformLocation(MapWallShader.ID, "Wmodel");
-            unsigned int MapWallViewLoc = glGetUniformLocation(MapWallShader.ID, "Wview");
-            unsigned int MapWallColorLoc = glGetUniformLocation(MapWallShader.ID, "WColor");
-            unsigned int MapWallProjectionLoc = glGetUniformLocation(MapWallShader.ID, "Wprojection");
+            // TempWall values:
+            TempWall.findpos();
+            TempWall.model = glm::translate(TempWall.model, glm::vec3(TempWall.coords[0], TempWall.coords[1], -2.0f));
+            glBufferData(GL_ARRAY_BUFFER, sizeof(TempWall.pos), TempWall.pos, GL_DYNAMIC_DRAW);
+            glUniformMatrix4fv(TempWallModelLoc, 1, GL_FALSE, glm::value_ptr(TempWall.model));
+            glUniformMatrix4fv(TempWallViewLoc, 1, GL_FALSE, glm::value_ptr(TempWall.view));
+            glUniform4fv(TempWallColorLoc, 1, glm::value_ptr(TempWall.color));
+            glUniformMatrix4fv(TempWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(TempWall.projection));
+            TempWall.model = glm::mat4(1.0f);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
             if(MapWall.index == 0) {}
             else
             {
@@ -209,7 +242,7 @@ int main()
                     MapWall.pos[15] =  MapWall.width[i]; MapWall.pos[16] = -MapWall.height[i]; MapWall.pos[17] = 0.0f;
                     MapWall.model = glm::translate(MapWall.model, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
                     MapWallShader.use();
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_DYNAMIC_DRAW);
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_STATIC_DRAW);
                     glUniformMatrix4fv(MapWallModelLoc, 1, GL_FALSE, glm::value_ptr(MapWall.model));
                     glUniformMatrix4fv(MapWallViewLoc, 1, GL_FALSE, glm::value_ptr(MapWall.view));
                     glUniform4fv(MapWallColorLoc, 1, glm::value_ptr(MapWall.color));
@@ -246,7 +279,7 @@ int main()
         return -1;
     }
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-    Shader PacmanShader("Shaders/Pacman.vs", "Shaders/Pacman.fs");
+    Shader PacmanShader("Shaders/Pacman/Pacman.vs", "Shaders/Pacman/Pacman.fs");
     glGenVertexArrays(1, &Pacman.VAO);
     glGenBuffers(1, &Pacman.VBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
@@ -261,7 +294,7 @@ int main()
     Pacman.projection = projection; 
     
     // Wall config:
-    Shader WallShader("Shaders/Wall.vs", "Shaders/Wall.fs");    
+    Shader WallShader("Shaders/Wall/Wall.vs", "Shaders/Wall/Wall.fs");    
     glGenVertexArrays(1, &Wall.VAO);
     glGenBuffers(1, &Wall.VBO);
     glBindVertexArray(Wall.VAO);
@@ -566,6 +599,14 @@ void processMakerInput(GLFWwindow *window)
             MapWall.MousePressed = true;
             MapWall.StartingX = mx;
             MapWall.StartingY = my;
+        }
+        else
+        {
+            TempWall.width = abs((((float)MapWall.StartingX-(float)mx)/2))/((float)WINDOW_WIDTH/2);
+            TempWall.height = abs((((float)MapWall.StartingY-(float)my)/2))/((float)WINDOW_HEIGHT/2);
+            
+            TempWall.coords[0] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
+            TempWall.coords[1] = -((((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f);
         }
     }
     else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
