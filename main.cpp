@@ -228,7 +228,7 @@ int main()
             glUniform4fv(TempWallColorLoc, 1, glm::value_ptr(TempWall.color));
             glUniformMatrix4fv(TempWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(TempWall.projection));
             TempWall.model = glm::mat4(1.0f);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            // glDrawArrays(GL_TRIANGLES, 0, 6);
             if(MapWall.index == 0) {}
             else
             {
@@ -591,7 +591,7 @@ void processMakerInput(GLFWwindow *window)
     }
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
-    LogMovement(mx, my);
+    // LogMovement(mx, my);
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
     {
         if(!MapWall.MousePressed)
