@@ -49,6 +49,7 @@ class button {
         float pos[18];
         float coords[2];
         bool isPressed;
+        bool ShouldRender;
         glm::vec4 color;
         unsigned int VBO;
         unsigned int VAO;

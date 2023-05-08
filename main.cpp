@@ -227,8 +227,11 @@ int main()
             glUniformMatrix4fv(TempWallViewLoc, 1, GL_FALSE, glm::value_ptr(TempWall.view));
             glUniform4fv(TempWallColorLoc, 1, glm::value_ptr(TempWall.color));
             glUniformMatrix4fv(TempWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(TempWall.projection));
+            if(TempWall.ShouldRender)
+            {
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
             TempWall.model = glm::mat4(1.0f);
-            // glDrawArrays(GL_TRIANGLES, 0, 6);
             if(MapWall.index == 0) {}
             else
             {
@@ -591,7 +594,7 @@ void processMakerInput(GLFWwindow *window)
     }
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
-    // LogMovement(mx, my);
+    LogMovement(mx, my);
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
     {
         if(!MapWall.MousePressed)
@@ -607,6 +610,8 @@ void processMakerInput(GLFWwindow *window)
             
             TempWall.coords[0] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
             TempWall.coords[1] = -((((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f);
+
+            TempWall.ShouldRender = true;
         }
     }
     else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
@@ -614,6 +619,7 @@ void processMakerInput(GLFWwindow *window)
         if(MapWall.MousePressed)
         {
             MapWall.MousePressed = false;
+            TempWall.ShouldRender = false;
             
             MapWall.width[MapWall.index] = abs((((float)MapWall.StartingX-(float)mx)/2))/((float)WINDOW_WIDTH/2);
             MapWall.height[MapWall.index] = abs((((float)MapWall.StartingY-(float)my)/2))/((float)WINDOW_HEIGHT/2);
