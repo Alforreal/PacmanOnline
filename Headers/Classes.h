@@ -41,6 +41,7 @@ class wall
         double StartingX;
         double StartingY;
         bool MousePressed = false;
+        float MapSpeed;
 };
 class button {
     public:

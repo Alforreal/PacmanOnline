@@ -43,6 +43,7 @@ int main()
         // Walls:
     Wall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
     MapWall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    MapWall.MapSpeed = 0.015f;
     TempWall.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
         // Buttons:
     OriginalMapButton.width = 0.5f;
@@ -245,7 +246,7 @@ int main()
                     MapWall.pos[15] =  MapWall.width[i]; MapWall.pos[16] = -MapWall.height[i]; MapWall.pos[17] = 0.0f;
                     MapWall.model = glm::translate(MapWall.model, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
                     MapWallShader.use();
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_STATIC_DRAW);
+                    glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_DYNAMIC_DRAW);
                     glUniformMatrix4fv(MapWallModelLoc, 1, GL_FALSE, glm::value_ptr(MapWall.model));
                     glUniformMatrix4fv(MapWallViewLoc, 1, GL_FALSE, glm::value_ptr(MapWall.view));
                     glUniform4fv(MapWallColorLoc, 1, glm::value_ptr(MapWall.color));
@@ -592,9 +593,21 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
+    else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            MapWall.y[MapWall.index] += MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout --;
+        }
+    }
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
-    LogMovement(mx, my);
+    // LogMovement(mx, my);
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
     {
         if(!MapWall.MousePressed)
