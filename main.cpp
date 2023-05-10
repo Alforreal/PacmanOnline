@@ -13,7 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Headers/Collision.h"
 #include "Headers/Classes.h"
-// #include <unistd.h> // used for usleep()
+#include <unistd.h> // used for usleep()
 
 int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 std::string map = "Maps/New.lvl";
@@ -238,20 +238,23 @@ int main()
             {
                 for(int i = 0, n = MapWall.index; i < n; i++)
                 {
+                    // MapWall.view[3][0] = MapWall.x[i];
+                    // MapWall.view[3][1] = MapWall.y[i];
+                    MapWall.view = glm::translate(MapWall.view, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
+                    processMakerInput(mapcreator);
                     MapWall.pos[0]  =  MapWall.width[i]; MapWall.pos[1]  =  MapWall.height[i]; MapWall.pos[2]  = 0.0f;
                     MapWall.pos[3]  =  MapWall.width[i]; MapWall.pos[4]  = -MapWall.height[i]; MapWall.pos[5]  = 0.0f;
                     MapWall.pos[6]  = -MapWall.width[i]; MapWall.pos[7]  =  MapWall.height[i]; MapWall.pos[8]  = 0.0f;
                     MapWall.pos[9]  = -MapWall.width[i]; MapWall.pos[10] =  MapWall.height[i]; MapWall.pos[11] = 0.0f;
                     MapWall.pos[12] = -MapWall.width[i]; MapWall.pos[13] = -MapWall.height[i]; MapWall.pos[14] = 0.0f;
                     MapWall.pos[15] =  MapWall.width[i]; MapWall.pos[16] = -MapWall.height[i]; MapWall.pos[17] = 0.0f;
-                    MapWall.model = glm::translate(MapWall.model, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
                     MapWallShader.use();
                     glBufferData(GL_ARRAY_BUFFER, sizeof(MapWall.pos), MapWall.pos, GL_DYNAMIC_DRAW);
                     glUniformMatrix4fv(MapWallModelLoc, 1, GL_FALSE, glm::value_ptr(MapWall.model));
                     glUniformMatrix4fv(MapWallViewLoc, 1, GL_FALSE, glm::value_ptr(MapWall.view));
                     glUniform4fv(MapWallColorLoc, 1, glm::value_ptr(MapWall.color));
                     glUniformMatrix4fv(MapWallProjectionLoc, 1, GL_FALSE, glm::value_ptr(MapWall.projection));
-                    MapWall.model = glm::mat4(1.0f);
+                    MapWall.view = glm::mat4(1.0f);
                     glDrawArrays(GL_TRIANGLES, 0, 6);
                 }
             }
@@ -262,6 +265,7 @@ int main()
             }
             glfwSwapBuffers(mapcreator);
             glfwPollEvents();
+            // usleep(100);
         }
     }
     // Configuring the main game:
@@ -598,7 +602,7 @@ void processMakerInput(GLFWwindow *window)
         if(timeout == 0)
         {
             timeout = 25;
-            MapWall.y[MapWall.index] += MapWall.MapSpeed;
+            MapWall.view = glm::translate(MapWall.view, glm::vec3(0.0f, MapWall.MapSpeed, 0.0f));
         }
         else if(timeout > 0)
         {
@@ -615,16 +619,18 @@ void processMakerInput(GLFWwindow *window)
             MapWall.MousePressed = true;
             MapWall.StartingX = mx;
             MapWall.StartingY = my;
+            TempWall.ShouldRender = true;
         }
         else
         {
+            TempWall.ShouldRender = true;
+
             TempWall.width = abs((((float)MapWall.StartingX-(float)mx)/2))/((float)WINDOW_WIDTH/2);
             TempWall.height = abs((((float)MapWall.StartingY-(float)my)/2))/((float)WINDOW_HEIGHT/2);
             
             TempWall.coords[0] = (((float)MapWall.StartingX+(float)mx)/2)/((float)WINDOW_WIDTH/2) - 1.0f;
             TempWall.coords[1] = -((((float)MapWall.StartingY+(float)my)/2)/((float)WINDOW_HEIGHT/2) - 1.0f);
 
-            TempWall.ShouldRender = true;
         }
     }
     else if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_RELEASE)
