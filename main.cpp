@@ -233,15 +233,15 @@ int main()
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
             TempWall.model = glm::mat4(1.0f);
-            if(MapWall.index == 0) {}
+            if(MapWall.index == 0) {processMakerInput(mapcreator);}
             else
             {
+                processMakerInput(mapcreator);
                 for(int i = 0, n = MapWall.index; i < n; i++)
                 {
                     // MapWall.view[3][0] = MapWall.x[i];
                     // MapWall.view[3][1] = MapWall.y[i];
                     MapWall.view = glm::translate(MapWall.view, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
-                    processMakerInput(mapcreator);
                     MapWall.pos[0]  =  MapWall.width[i]; MapWall.pos[1]  =  MapWall.height[i]; MapWall.pos[2]  = 0.0f;
                     MapWall.pos[3]  =  MapWall.width[i]; MapWall.pos[4]  = -MapWall.height[i]; MapWall.pos[5]  = 0.0f;
                     MapWall.pos[6]  = -MapWall.width[i]; MapWall.pos[7]  =  MapWall.height[i]; MapWall.pos[8]  = 0.0f;
@@ -538,7 +538,7 @@ void processMakerInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    else if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -554,7 +554,7 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -570,11 +570,11 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
         if(timeout == 0)
         {
-            timeout = 25;
+            timeout = 50;
             std::ofstream output("Maps/New.lvl");
             if(output)
             {
@@ -597,16 +597,101 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
+    else if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            // MapWall.view = glm::translate(MapWall.view, glm::vec3(0.0f, MapWall.MapSpeed, 0.0f));
+            MapWall.y[MapWall.index-1] += MapWall.MapSpeed; 
+        }
+        else if(timeout > 0)
+        {
+            timeout --;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            MapWall.y[MapWall.index-1] -= MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            MapWall.x[MapWall.index-1] -= MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            MapWall.x[MapWall.index-1] += MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            MapWall.width[MapWall.index-1] += MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            MapWall.width[MapWall.index-1] -= MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
     else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         if(timeout == 0)
         {
             timeout = 25;
-            MapWall.view = glm::translate(MapWall.view, glm::vec3(0.0f, MapWall.MapSpeed, 0.0f));
+            MapWall.height[MapWall.index-1] += MapWall.MapSpeed;
         }
         else if(timeout > 0)
         {
-            timeout --;
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        if(timeout == 0)
+        {
+            timeout = 25;
+            MapWall.height[MapWall.index-1] -= MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
         }
     }
     double mx, my;
