@@ -709,20 +709,20 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-    {
-        if(timeout)
-        {
-            timeout = 100;
-            std::cout << "Enter the width of the wall: ";
-            std::cin >> input;
-            MapWall.width[MapWall.index-1] = input;
-        }
-        else if(timeout > 0)
-        {
-            timeout--;
-        }
-    }
+    // else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    // {
+    //     if(timeout)
+    //     {
+    //         timeout = 100;
+    //         std::cout << "Enter the width of the wall: ";
+    //         std::cin >> input;
+    //         MapWall.width[MapWall.index-1] = input;
+    //     }
+    //     else if(timeout > 0)
+    //     {
+    //         timeout--;
+    //     }
+    // }
     else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
         if(timeout)
