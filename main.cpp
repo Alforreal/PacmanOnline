@@ -19,6 +19,7 @@ int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
 std::string map = "Maps/New.lvl";
 int timeout = 0;
 int ZYcount = 0;
+float input;
 // bool pmovement = false; // movement on a previous iteration, not yet implemented
 bool NewMap = false;
 sprite Pacman;
@@ -597,7 +598,7 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -610,7 +611,7 @@ void processMakerInput(GLFWwindow *window)
             timeout --;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -622,7 +623,7 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -634,7 +635,7 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -646,7 +647,7 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -658,7 +659,7 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -670,7 +671,7 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
@@ -682,12 +683,68 @@ void processMakerInput(GLFWwindow *window)
             timeout--;
         }
     }
-    else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) != GLFW_PRESS)
     {
         if(timeout == 0)
         {
             timeout = 25;
             MapWall.height[MapWall.index-1] -= MapWall.MapSpeed;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        if(timeout)
+        {
+            timeout = 100;
+            std::cout << "Enter the width of the wall: ";
+            std::cin >> input;
+            MapWall.width[MapWall.index-1] = input;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        if(timeout)
+        {
+            timeout = 100;
+            std::cout << "Enter the width of the wall: ";
+            std::cin >> input;
+            MapWall.width[MapWall.index-1] = input;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        if(timeout)
+        {
+            timeout = 100;
+            std::cout << "Enter the height of the wall: ";
+            std::cin >> input;
+            MapWall.height[MapWall.index-1] = input;
+        }
+        else if(timeout > 0)
+        {
+            timeout--;
+        }
+    }
+    else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        if(timeout)
+        {
+            timeout = 100;
+            std::cout << "Enter the height of the wall: ";
+            std::cin >> input;
+            MapWall.height[MapWall.index-1] = input;
         }
         else if(timeout > 0)
         {
