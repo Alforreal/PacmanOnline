@@ -45,6 +45,7 @@ int main()
     Wall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
     MapWall.color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
     MapWall.MapSpeed = 0.015f;
+    MapWall.index = 0;
     TempWall.color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
         // Buttons:
     OriginalMapButton.width = 0.5f;
@@ -166,7 +167,30 @@ int main()
     }
     if(NewMap)
     {
-        WINDOW_WIDTH = 600;
+        // Load values from the New.lvl:
+        std::ifstream input;
+        input.open("Maps/New.lvl");
+        if(input)
+        {   
+            MapWall.index = 0;
+            int j = 0;
+            for(std::string line; std::getline(input, line);)   //read stream line by line
+            {
+                std::istringstream in(line);
+                input >> Wall.x[j] >> Wall.y[j] >> Wall.width[j] >> Wall.height[j];
+                MapWall.index++;
+                j++;
+            }
+            std::cout << MapWall.index << "\n";
+            input.close();
+        }
+        else
+        {
+            input.close();
+            std::cout << "Failed to read input file\n";
+            return -1;
+        }
+    	WINDOW_WIDTH = 600;
         WINDOW_HEIGHT = 600;
         GLFWwindow* mapcreator = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Map creator", NULL, NULL);
         if(mapcreator == NULL)
@@ -240,8 +264,6 @@ int main()
                 processMakerInput(mapcreator);
                 for(int i = 0, n = MapWall.index; i < n; i++)
                 {
-                    // MapWall.view[3][0] = MapWall.x[i];
-                    // MapWall.view[3][1] = MapWall.y[i];
                     MapWall.view = glm::translate(MapWall.view, glm::vec3(MapWall.x[i], MapWall.y[i], -2.0f));
                     MapWall.pos[0]  =  MapWall.width[i]; MapWall.pos[1]  =  MapWall.height[i]; MapWall.pos[2]  = 0.0f;
                     MapWall.pos[3]  =  MapWall.width[i]; MapWall.pos[4]  = -MapWall.height[i]; MapWall.pos[5]  = 0.0f;
@@ -351,7 +373,6 @@ int main()
             for(std::string line; std::getline(level, line);)   //read stream line by line
             {
                 std::istringstream in(line);
-                std::string type;
                 in >> Wall.x[j] >> Wall.y[j] >> Wall.width[j] >> Wall.height[j];
                 Wall.pos[0]  =  Wall.width[j]; Wall.pos[1]  =  Wall.height[j]; Wall.pos[2]  = 0.0f;
                 Wall.pos[3]  =  Wall.width[j]; Wall.pos[4]  = -Wall.height[j]; Wall.pos[5]  = 0.0f;
@@ -528,7 +549,7 @@ void processMenuInput(GLFWwindow *window)
         NewMap = true;
     }
     double mx, my;
-    glfwGetCursorPos(window, &mx, &my);
+    glfwGetCursorPos(window, &mx, &my); 
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
     {
         OriginalMapButton.isPressed = MouseDetection((float)mx/((float)WINDOW_WIDTH/2)-1.0f, (float)my/((float)WINDOW_HEIGHT/2)-1.0f, OriginalMapButton.coords[0], OriginalMapButton.coords[1], OriginalMapButton.width, OriginalMapButton.height);
