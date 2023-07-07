@@ -173,13 +173,11 @@ int main()
         if(input)
         {   
             MapWall.index = 0;
-            int j = 0;
             for(std::string line; std::getline(input, line);)   //read stream line by line
             {
                 std::istringstream in(line);
-                input >> Wall.x[j] >> Wall.y[j] >> Wall.width[j] >> Wall.height[j];
+                input >> Wall.x[MapWall.index] >> Wall.y[MapWall.index] >> Wall.width[MapWall.index] >> Wall.height[MapWall.index];
                 MapWall.index++;
-                j++;
             }
             std::cout << MapWall.index << "\n";
             input.close();
@@ -425,7 +423,7 @@ void processGameInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
@@ -451,7 +449,7 @@ void processGameInput(GLFWwindow *window)
             LogMovement(Pacman.view[3][0], Pacman.view[3][1]);
         }
     }
-    else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
@@ -477,7 +475,7 @@ void processGameInput(GLFWwindow *window)
             LogMovement(Pacman.view[3][0], Pacman.view[3][1]);
         }  
     }
-    else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
@@ -504,7 +502,7 @@ void processGameInput(GLFWwindow *window)
         }
         
     }
-    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
         for(int i = 0, n = sizeof(Wall.x)/sizeof(float); i < n; i++)
         {
