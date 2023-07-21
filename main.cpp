@@ -16,7 +16,7 @@
 #include <unistd.h> // used for usleep()
 
 int WINDOW_HEIGHT = 600, WINDOW_WIDTH = 600;
-std::string map = "Maps/New.lvl";
+std::string map;
 int timeout = 0;
 int ZYcount = 0;
 float input;
@@ -153,13 +153,13 @@ int main()
             glfwDestroyWindow(menu);
             break;
         }
-        if(TestButton.isPressed)
+        else if(TestButton.isPressed)
         {
             map = "Maps/TestPlayground.lvl";
             glfwDestroyWindow(menu);
             break;
         }
-        if(NewMap)
+        else if(NewMap)
         {
             glfwDestroyWindow(menu);
             break;
@@ -168,6 +168,7 @@ int main()
     if(NewMap)
     {
         // Load values from the New.lvl:
+        /*
         std::ifstream input;
         input.open("Maps/New.lvl");
         if(input)
@@ -187,7 +188,7 @@ int main()
             input.close();
             std::cout << "Failed to read input file\n";
             return -1;
-        }
+        }*/
     	WINDOW_WIDTH = 600;
         WINDOW_HEIGHT = 600;
         GLFWwindow* mapcreator = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Map creator", NULL, NULL);
@@ -282,6 +283,7 @@ int main()
             if(glfwWindowShouldClose(mapcreator))
             {
                 glfwDestroyWindow(mapcreator);
+                map = "Maps/New.lvl";
                 break;
             }
             glfwSwapBuffers(mapcreator);
@@ -541,7 +543,11 @@ void LogMovement(float x, float y)
 void processMenuInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
         glfwSetWindowShouldClose(window, true);
+        NewMap = false;
+        map = "";
+    }
     else if(glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
     {
         NewMap = true;
@@ -629,7 +635,8 @@ void processMakerInput(GLFWwindow *window)
         {
             timeout = 25;
             system("clear");
-            std::cout << "Enter the width of the wall: ";
+            std::cout << "The current width of the wall is: " << MapWall.width[MapWall.index-1] << "\n";
+            std::cout << "Enter the new width of the wall: ";
             std::cin >> input;
             MapWall.width[MapWall.index-1] = input;
         }
@@ -645,6 +652,7 @@ void processMakerInput(GLFWwindow *window)
         {
             timeout = 25;
             system("clear");
+            std::cout << "The current height of the wall is: " << MapWall.height[MapWall.index-1] << "\n";
             std::cout << "Enter the height of the wall: ";
             std::cin >> input;
             MapWall.height[MapWall.index-1] = input;
